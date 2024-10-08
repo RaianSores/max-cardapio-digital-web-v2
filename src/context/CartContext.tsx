@@ -8,13 +8,21 @@ interface ICartProviderProps {
     children: ReactNode;
 }
 
+interface CartItem {
+    id: number;
+    productId: number;
+    valorTotal: number;
+    valorLiquido: number;
+    desconto: number;
+    vlrOutrasDesp: number;
+}
+
 interface ICartContextData {
-    cartItems: any[];
-    setCartItems: React.Dispatch<React.SetStateAction<any[]>>;
+    cartItems: CartItem[];
+    setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
     totalPedido: number;
     totalServico: number;
     setTotalServico: React.Dispatch<React.SetStateAction<number>>;
-    totalCouvert: number;
     totalFinal: number;
     cartItemCount: number;
     setCartItemCount: React.Dispatch<React.SetStateAction<number>>;
@@ -40,16 +48,17 @@ interface ICartContextData {
     setDesconto: React.Dispatch<React.SetStateAction<number>>;
     temContaMaxDigital: boolean;
     setTemContaMaxDigital: React.Dispatch<React.SetStateAction<boolean>>;
+    isModalOpen: boolean; 
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const CartContext = createContext<ICartContextData>({} as ICartContextData);
 
 export const CartProvider = ({ children }: ICartProviderProps) => {
-    const [cartItems, setCartItems] = useState<Conta[]>([]);
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [totalPedido, setTotalPedido] = useState(0);
     const [totalServico, setTotalServico] = useState(0);
     const [taxaServico, setTaxaServico] = useState(0);
-    const [totalCouvert, setTotalCouvert] = useState(0);
     const [totalFinal, setTotalFinal] = useState(0);
     const [desconto, setDesconto] = useState(0);
     const [cartItemCount, setCartItemCount] = useState(0);
@@ -59,6 +68,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     const [atendente, setAtendente] = useState(0);
     const [antecipacao, setAntecipacao] = useState<number>(0);
     const [temContaMaxDigital, setTemContaMaxDigital] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     function calcularTotais() {
         let pedido = 0;
@@ -84,27 +94,32 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             const mesa = await StorageService.getItem("numMesa");
             if (mesa !== null) {
                 setNumeroMesa(parseInt(mesa));
-            } else {
-               
             }
         } catch (error) {
-       
+            console.error("Erro ao buscar número da mesa", error);
         }
     };
 
     async function fetchCartItems(numeroMesa: number) {
         try {
-            const items = await getItemsMesa(numeroMesa);
-            if (items.length === 0) {
-                setCartItems([]);
-            } else {
-                setCartItems(items);
-            }
+            const items: Conta[] = await getItemsMesa(numeroMesa);
+    
+            // Mapear os itens de Conta para CartItem, adicionando a propriedade `id`
+            const cartItems: CartItem[] = items.map((item, index) => ({
+                id: index, // ou qualquer lógica para gerar um ID
+                productId: item.productId,
+                valorTotal: item.valorTotal,
+                valorLiquido: item.valorLiquido,
+                desconto: item.desconto,
+                vlrOutrasDesp: item.vlrOutrasDesp,
+            }));
+    
+            setCartItems(cartItems.length === 0 ? [] : cartItems);
         } catch (error) {
-      
+            console.error("Erro ao buscar itens da mesa", error);
         }
     }
-
+    
 
     const fetchCartItemCount = async () => {
         const itemCount = await getCartItemCount();
@@ -118,7 +133,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 setNumMesa(mesa);
             }
         } catch (error) {
-           
+            console.error("Erro ao buscar número da mesa", error);
         }
     };
 
@@ -127,13 +142,10 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             const empId = await StorageService.getItem("empId");
             const operador = await StorageService.getItem("atendente");
 
-            setNumMesa(numMesa || "");
             setEmpId(empId || "1");
-            if (operador) {
-                setAtendente(parseInt(operador));
-            }
+            setAtendente(parseInt(operador || "0"));
         } catch (error) {
-            
+            console.error("Erro ao buscar dados do usuário", error);
         }
     };
 
@@ -146,7 +158,6 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 totalPedido,
                 totalServico,
                 setTotalServico,
-                totalCouvert,
                 totalFinal,
                 cartItemCount,
                 setCartItemCount,
@@ -171,6 +182,8 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 setTaxaServico,
                 desconto,
                 setDesconto,
+                isModalOpen, 
+                setIsModalOpen,
             }}
         >
             {children}

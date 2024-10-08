@@ -8,19 +8,15 @@ export const ProductListContainer = styled.div<ProductListContainerProps>`
   display: flex;
   flex-direction: column;
   background-color: ${(props) => (props.pedidoConta ? "#740c0c" : "#3E3E3E")};
-  width: 75%; /* Adiciona uma largura para ocupar o restante da tela */
+  width: 100%;
   box-sizing: border-box;
-
-  @media (max-width: 768px) {
-    width: 100%;  
-  }
 `;
 
 export const ProductListContent = styled.div<ProductListContainerProps>`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: 10px 0;
+  padding: 1px 0;
   box-sizing: border-box;
 `;
 
@@ -30,7 +26,7 @@ export const LoadingContainer = styled.div`
   align-items: center;
   height: 100%;
   img {
-    width: 100px;
-    height: 100px;
+    width: 20%;
+    height: 20%;
   }
 `;

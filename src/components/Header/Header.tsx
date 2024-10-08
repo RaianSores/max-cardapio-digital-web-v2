@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useCallback } from "react";
 import { useRouter } from 'next/router';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faConciergeBell, faCartPlus, faHandHoldingUsd } from "@fortawesome/free-solid-svg-icons";
@@ -18,17 +18,20 @@ import {
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { 
-    cartItemCount, 
-    numMesa, 
-    fetchCartItemCount, 
-    fetchNumMesa 
-  } = useContext(CartContext);
+  const { cartItemCount, numMesa, fetchCartItemCount, fetchNumMesa } = useContext(CartContext);
+
+  const memoizedFetchCartItemCount = useCallback(() => {
+    fetchCartItemCount();
+  }, [fetchCartItemCount]);
+
+  const memoizedFetchNumMesa = useCallback(() => {
+    fetchNumMesa();
+  }, [fetchNumMesa]);
 
   useEffect(() => {
-    fetchCartItemCount();
-    fetchNumMesa();
-  }, []);
+    memoizedFetchCartItemCount();
+    memoizedFetchNumMesa();
+  }, [memoizedFetchCartItemCount, memoizedFetchNumMesa, cartItemCount]);
 
   return (
     <HeaderContainer>

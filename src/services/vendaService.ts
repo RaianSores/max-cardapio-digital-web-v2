@@ -1,5 +1,12 @@
 import api from './api';
-import {IPix, IRequestAccount, Venda} from '../@types/Venda';
+import { IPix, IRequestAccount, Venda } from '../@types/Venda';
+
+// Tipo para a resposta do status de pagamento via Pix
+interface IPaymentStatusPix {
+  status: string;
+  mensagem: string;
+  [key: string]: unknown; // Substituímos any por unknown para maior segurança de tipos
+}
 
 export const sendVenda = async (venda: Venda): Promise<Venda> => {
   try {
@@ -43,11 +50,12 @@ export const generatePix = async (pix: IPix): Promise<IPix> => {
   }
 };
 
-export const checkPaymentStatusPix = async (TxId: string): Promise<any> => {
+// Agora estamos utilizando IPaymentStatusPix em vez de any
+export const checkPaymentStatusPix = async (TxId: string): Promise<IPaymentStatusPix> => {
   try {
     const response = await api.get(`/financeiro/pix/consultar/${TxId}`);
     if (response.status === 200) {
-      return response.data;
+      return response.data as IPaymentStatusPix;
     } else {
       throw new Error(response.data.message);
     }

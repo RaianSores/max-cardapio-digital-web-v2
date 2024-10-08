@@ -3,9 +3,8 @@ import { Grupo } from "../@types/Grupo";
 
 export const getGrupos = async (): Promise<Grupo[]> => {
   try {
-    const response = await api.get<Grupo[]>("/food/grupo/consultar");    
-    console.log(JSON.stringify(response, undefined, 2))
-    return response.data;
+    const response = await api.get<{ docs: Grupo[] }>("/grupo/consultar");
+    return response.data.docs;
   } catch (error) {
     throw error;
   }

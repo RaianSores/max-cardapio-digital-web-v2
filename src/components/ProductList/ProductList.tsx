@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+
 import { getProdutos, getProdutosPromocoes } from "../../services/produtoService";
-import { Produto } from "../../@types/Produto";
+import { IProduto } from "../../@types/Produto";
 import { LoadingContainer, ProductListContainer, ProductListContent } from "./styles";
 import ProductCard from "../ProductCard/ProductCard";
 
@@ -9,22 +10,12 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
-  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [produtos, setProdutos] = useState<IProduto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const pedidoConta = false;
 
-  useEffect(() => {
-    if (selectedGroupId === 10000) {
-      fetchProdutosPromocoes();
-    } else if (selectedGroupId === 10001) {
-      fetchProdutosHome();
-    } else {
-      fetchProdutos();
-    }
-  }, [selectedGroupId]);
-
-  const fetchProdutos = async () => {
+  const fetchProdutos = useCallback(async () => {
     setIsLoading(true);
     try {
       const produtosData = await getProdutos(selectedGroupId);
@@ -34,9 +25,9 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedGroupId]);
 
-  const fetchProdutosHome = async () => {
+  const fetchProdutosHome = useCallback(async () => {
     setIsLoading(true);
     try {
       const produtosData = await getProdutos(0);
@@ -46,9 +37,9 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchProdutosPromocoes = async () => {
+  const fetchProdutosPromocoes = useCallback(async () => {
     setIsLoading(true);
     try {
       const produtosData = await getProdutosPromocoes();
@@ -58,7 +49,17 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (selectedGroupId === 10000) {
+      fetchProdutosPromocoes();
+    } else if (selectedGroupId === 10001) {
+      fetchProdutosHome();
+    } else {
+      fetchProdutos();
+    }
+  }, [selectedGroupId, fetchProdutos, fetchProdutosHome, fetchProdutosPromocoes]);
 
   return (
     <ProductListContainer pedidoConta={pedidoConta}>
@@ -66,15 +67,16 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
         <LoadingContainer>Carregando...</LoadingContainer>
       ) : (
         <ProductListContent pedidoConta={pedidoConta}>           
-           {produtos.map((produto) => (
+          {produtos.map((produto) => (
             <ProductCard
-                key={produto.proId}
-                image={produto.imagem}
-                title={produto.descricao}
-                priceFinal={produto.valorVenda}
-                priceDiscount={produto.valorPromocao}
+              key={produto.ID}
+              proID={produto.proId}
+              foto={produto.Foto}
+              descricao={produto.Descricao}
+              priceFinal={produto.PrecoNormal}
+              priceDiscount={produto.PrecoPromo}
             />
-          ))} 
+          ))}
         </ProductListContent>
       )}
     </ProductListContainer>

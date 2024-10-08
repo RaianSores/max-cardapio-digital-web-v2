@@ -1,63 +1,83 @@
-import React from "react";
-import { formatPrice } from "../../utils/format";
+import React, { useContext } from "react";
+import Image from 'next/image';
 import {
   ProductCardContainer,
-  ProductCardPhoto,
   ProductCardInfo,
   ProductCardTitle,
-  ProductCardAbout,
   PriceContainer,
   PriceDiscount,
   PriceFinal,
 } from "./styles";
+import { formatPrice } from "../../utils/format";
+import Modal from "../Modal/Modal";
+import ProductSection from "../ProductSection/ProductSection";
+import { CartContext } from "@/context/CartContext";
+
+import defaultImage from "../../assets/img/sem-foto.jpg";
 
 type ProductCardProps = {
-  image: string;
-  title: string;
+  proID: number;
+  foto: string;
+  descricao: string;
   priceFinal: number;
   priceDiscount?: number;
 };
 
-const defaultImage = require("../../assets/img/sem-foto.jpg");
-
 const ProductCard: React.FC<ProductCardProps> = ({
-  image,
-  title,
+  proID,
+  foto,
+  descricao,
   priceFinal,
   priceDiscount,
 }) => {
-  const renderImage = () => {
-    if (image) {
-      const base64Clean = image.replace(/\r?\n|\r/g, "");
-      return (
-        <ProductCardPhoto
-          src={`data:image/png;base64,${base64Clean}`}
-          alt={title}
-        />
-      );
-    } else {
-      return <ProductCardPhoto src={defaultImage} alt="default" />;
-    }
+  const { isModalOpen, setIsModalOpen } = useContext(CartContext);
+  const temPromocao = priceDiscount && priceDiscount < priceFinal;
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
   };
 
-  const temPromocao = !!priceDiscount;
   return (
-    <ProductCardContainer>
-      <div>{renderImage()}</div>
-      <ProductCardInfo>
-        <ProductCardTitle>{title}</ProductCardTitle>
-        <PriceContainer>
-          <PriceFinal>
+    <>
+      <ProductCardContainer onClick={toggleModal}>
+        <Image
+          src={
+            foto
+              ? `data:image/png;base64,${foto}`
+              : defaultImage
+          }
+          alt={descricao}
+          width={75}
+          height={75}
+          objectFit="cover"
+          style={{ borderRadius: "9px" }}
+
+        />
+        <ProductCardInfo>
+          <ProductCardTitle>{descricao}</ProductCardTitle>
+          <PriceContainer>
             {temPromocao ? (
-              <PriceDiscount>{formatPrice(priceFinal)}</PriceDiscount>
+              <>
+                <PriceDiscount>{formatPrice(priceFinal)}</PriceDiscount>
+                <PriceFinal>
+                  {formatPrice(priceDiscount)}
+                </PriceFinal>
+              </>
             ) : (
-              <>{formatPrice(priceFinal)}</>
+              <PriceFinal>{formatPrice(priceFinal)}</PriceFinal>
             )}
-          </PriceFinal>
-          {priceDiscount && <PriceFinal>{formatPrice(priceDiscount)}</PriceFinal>}
-        </PriceContainer>
-      </ProductCardInfo>
-    </ProductCardContainer>
+          </PriceContainer>
+        </ProductCardInfo>
+      </ProductCardContainer>
+      <Modal isOpen={isModalOpen} onClose={toggleModal}>
+        <ProductSection 
+          proID={proID}
+          descricao={descricao}
+          priceFinal={priceFinal}
+          priceDiscount={priceDiscount}
+        />
+      </Modal>
+    </>
   );
 };
 

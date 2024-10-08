@@ -1,7 +1,6 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
 import StorageService from "../utils/StorageService";
 
-// Função para obter o IP, porta e outros dados de configuração
 const getConfigData = async () => {
   try {
     const ipUrl = await StorageService.getItem("ipUrl");
@@ -9,21 +8,21 @@ const getConfigData = async () => {
     const idEmpresa = await StorageService.getItem("idEmpresa");
     const token = await StorageService.getItem("token");
 
+    console.log('getConfigData');
+
     if (ipUrl && porta && idEmpresa && token) {
       return {
-        baseURL: `http://${ipUrl}:${porta}/v1`,
+        baseURL: `http://${ipUrl}:${porta}/v2`,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: token,
           empId: idEmpresa,
         },
       };
     } else {
-      //showToast("Dados de configuração incompletos no Storage!", 'error');
       throw new Error("Configuração incompleta");
     }
   } catch (error) {
-    //showToast("Erro ao obter dados de configuração!", 'error');
     throw error;
   }
 };
@@ -36,20 +35,22 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-// Interceptor para definir dinamicamente a baseURL, token e outros headers
 api.interceptors.request.use(
-  async (config) => {
+  async (config: InternalAxiosRequestConfig) => {  
     try {
       const configData = await getConfigData();
       if (configData) {
         config.baseURL = configData.baseURL;
-        config.headers = {
-          ...config.headers,
-          ...configData.headers,
-        };
+        
+        // Convertendo o objeto de headers para AxiosHeaders
+        if (config.headers instanceof AxiosHeaders) {
+          config.headers.set('Content-Type', configData.headers['Content-Type']);
+          config.headers.set('Authorization', configData.headers['Authorization']);
+          config.headers.set('empId', configData.headers['empId']);
+        }
       }
     } catch (error) {
-      showToast("Erro ao definir configurações de requisição!", 'error');
+      //showToast("Erro ao definir configurações de requisição!", 'error');
     }
     return config;
   },

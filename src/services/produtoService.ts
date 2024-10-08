@@ -1,23 +1,23 @@
 import api from './api';
-import {Produto} from '../@types/Produto';
+import { IProduto } from '../@types/Produto';
 
-export const getProdutos = async (idGrupo: number): Promise<any> => {
+export const getProdutos = async (idGrupo: number): Promise<IProduto[]> => {
   try {
-    const response = await api.get<{docs: Produto[]}>(
-      `/food/produto/consultar?idGrupo=${idGrupo}`,
+    const response = await api.get<{ docs: IProduto[] }>(
+      `/produto/consultar?grupo_id=${idGrupo}`,
     );
-    return response.data;
+    return response.data.docs;
   } catch (error) {
     throw error;
   }
 };
 
-export const getProdutosPromocoes = async (): Promise<any> => {
+export const getProdutosPromocoes = async (): Promise<IProduto[]> => {
   try {
-    const response = await api.get<{docs: Produto[]}>(
-      `/food/produtoPromocoes/consultar`,
+    const response = await api.get<{ docs: IProduto[] }>(
+      `/promocoes/consultar`,
     );
-    return response.data;
+    return response.data.docs;
   } catch (error) {
     throw error;
   }

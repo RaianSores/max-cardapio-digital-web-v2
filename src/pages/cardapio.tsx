@@ -4,7 +4,7 @@ import Home from '@/components/Home/Home';
 const CardapioPage: React.FC = () => {
   return (
     <>
-    <Head>
+      <Head>
         <title>Max-Food | Cardápio Digital</title>
         <meta name="description" content="Max-Food" />
         <link rel="icon" href="./favicon.ico" />

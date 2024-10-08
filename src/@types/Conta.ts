@@ -1,6 +1,6 @@
 export interface Conta {
   Id: number;
-  codProduto: number;
+  productId: number;
   vendaId: number;
   qtde: number;
   descricaoProd: string;

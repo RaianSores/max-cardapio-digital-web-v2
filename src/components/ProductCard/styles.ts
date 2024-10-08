@@ -9,40 +9,19 @@ export const ProductCardContainer = styled.div`
   align-items: flex-start;
   padding: 6px;
   gap: 10px;
-  height: 200px;
+  height: 85px;
   width: 350px;
-  max-height: 200px;
+  max-height: 85px;
   max-width: 350px;
   margin-bottom: 0.4rem;
-
-  @media (max-width: 768px) {
-    height: 85px;
-    max-height: 85px;
-  }
-`;
-
-export const ProductCardPhoto = styled.img`
-  justify-content: center;
-  align-items: center;
-  padding: 1px;
-  overflow: hidden;
-  height: 200px;
-  width: 120px;
-  max-width: 120px;
-  max-height: 200px;
-  border-radius: 10px;
-
-  @media (max-width: 768px) {
-    max-width: 75px;
-    max-height: 75px;
-  }
 `;
 
 export const ProductCardInfo = styled.div`
   flex: 1;
   display: flex;
+  position: relative;
   flex-direction: column;
-  font-size: 14px;
+  font-size: 10px;
   color: #46423f;
 `;
 
@@ -75,5 +54,4 @@ export const PriceFinal = styled.span`
   font-weight: bold;
   font-size: 24px;
   color: #46423f;
-  margin-left: 5px;
 `;
