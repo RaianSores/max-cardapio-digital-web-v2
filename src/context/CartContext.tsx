@@ -3,6 +3,8 @@ import { getItemsMesa } from "../services/contaService";
 import { getCartItemCount } from '../utils/cartUtils';
 import { Conta } from '../@types/Conta';
 import StorageService from '../utils/StorageService';
+import { Venda } from '@/@types/Venda';
+import { getSale } from '@/services/vendaService';
 
 interface ICartProviderProps {
     children: ReactNode;
@@ -17,6 +19,14 @@ interface CartItem {
     vlrOutrasDesp: number;
 }
 
+type ProductCardProps = {
+    proID: number;
+    foto: string;
+    descricao: string;
+    priceFinal: number;
+    priceDiscount?: number;
+  };
+
 interface ICartContextData {
     cartItems: CartItem[];
     setCartItems: React.Dispatch<React.SetStateAction<CartItem[]>>;
@@ -30,9 +40,10 @@ interface ICartContextData {
     numeroMesa: number | null;
     setNumeroMesa: React.Dispatch<React.SetStateAction<number | null>>;
     fetchNumeroMesa: () => void;
+    fetchItems: () => void;
     fetchCartItems: (numeroMesa: number) => void;
-    numMesa: string;
-    setNumMesa: React.Dispatch<React.SetStateAction<string>>;
+    numMesa: number;
+    setNumMesa: React.Dispatch<React.SetStateAction<number>>;
     fetchCartItemCount: () => void;
     fetchNumMesa: () => void;
     empId: string;
@@ -48,8 +59,14 @@ interface ICartContextData {
     setDesconto: React.Dispatch<React.SetStateAction<number>>;
     temContaMaxDigital: boolean;
     setTemContaMaxDigital: React.Dispatch<React.SetStateAction<boolean>>;
-    isModalOpen: boolean; 
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    isModalOpen: boolean;
+    setIsModalOpen: (value: boolean) => void;
+    selectedProduct: ProductCardProps | null;
+    setSelectedProduct: (product: ProductCardProps | null) => void;
+    vendaId: number; 
+    setVendaId: React.Dispatch<React.SetStateAction<number>>;
+    venda: Venda[]; 
+    setVenda: React.Dispatch<React.SetStateAction<Venda[]>>;
 }
 
 export const CartContext = createContext<ICartContextData>({} as ICartContextData);
@@ -63,12 +80,15 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     const [desconto, setDesconto] = useState(0);
     const [cartItemCount, setCartItemCount] = useState(0);
     const [numeroMesa, setNumeroMesa] = useState<number | null>(null);
-    const [numMesa, setNumMesa] = useState('');
+    const [numMesa, setNumMesa] = useState<number>(0);
     const [empId, setEmpId] = useState('');
     const [atendente, setAtendente] = useState(0);
     const [antecipacao, setAntecipacao] = useState<number>(0);
     const [temContaMaxDigital, setTemContaMaxDigital] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<ProductCardProps | null>(null);
+    const [vendaId, setVendaId] = useState<number>(0);  
+    const [venda, setVenda] = useState<Venda[]>([]);
 
     function calcularTotais() {
         let pedido = 0;
@@ -92,11 +112,30 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     async function fetchNumeroMesa() {
         try {
             const mesa = await StorageService.getItem("numMesa");
+            console.log(mesa)
             if (mesa !== null) {
                 setNumeroMesa(parseInt(mesa));
             }
         } catch (error) {
             console.error("Erro ao buscar número da mesa", error);
+        }
+    };
+
+    const fetchItems = async () => {
+        try {
+            const vedId = await StorageService.getItem("vendaId");
+            if (vedId) {
+                console.log('fetchItems',numMesa)
+                const vendaData = await getSale(parseInt(vedId), numMesa);
+                
+                if (vendaData && vendaData.length > 0) {
+                    setVenda(vendaData);
+                } else {
+                    setVenda([]);   
+                }
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -130,7 +169,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         try {
             const mesa = await StorageService.getItem("numMesa");
             if (mesa) {
-                setNumMesa(mesa);
+                setNumMesa(parseInt(mesa));
             }
         } catch (error) {
             console.error("Erro ao buscar número da mesa", error);
@@ -183,7 +222,14 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 desconto,
                 setDesconto,
                 isModalOpen, 
-                setIsModalOpen,
+                setIsModalOpen, 
+                selectedProduct, 
+                setSelectedProduct,
+                vendaId, 
+                setVendaId,
+                venda, 
+                setVenda,
+                fetchItems
             }}
         >
             {children}

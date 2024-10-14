@@ -26,6 +26,7 @@ export const IconCircle = styled.button`
   border-radius: 50%;
   border: 2px solid #a3a2a2;
   background-color: #3e3e3e;
+  cursor: pointer;
 `;
 
 export const HeaderContentTable = styled.div`

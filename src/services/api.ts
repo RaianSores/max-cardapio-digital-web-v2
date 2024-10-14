@@ -8,8 +8,6 @@ const getConfigData = async () => {
     const idEmpresa = await StorageService.getItem("idEmpresa");
     const token = await StorageService.getItem("token");
 
-    console.log('getConfigData');
-
     if (ipUrl && porta && idEmpresa && token) {
       return {
         baseURL: `http://${ipUrl}:${porta}/v2`,

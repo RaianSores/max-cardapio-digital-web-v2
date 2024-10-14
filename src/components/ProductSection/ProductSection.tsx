@@ -77,7 +77,6 @@ const ProductSection: React.FC<ProductProps> = ({
             await StorageService.setItem("cartItems", JSON.stringify(cartItems));
             setCartItems(cartItems);
             setIsModalOpen(false);
-            console.log(JSON.stringify(cartItems, undefined, 2));
         } catch (error) {
             console.error("Erro ao adicionar item ao carrinho:", error);
         }
@@ -98,10 +97,13 @@ const ProductSection: React.FC<ProductProps> = ({
                 <IncreaseButton onClick={increaseQuantity}>+</IncreaseButton>
                 <ConfirmButton
                     onClick={() => {
+                        const price = priceDiscount && priceDiscount < priceFinal
+                            ? priceDiscount
+                            : priceFinal;
                         addToCart({
                             id: proID,
                             quantity,
-                            price: totalPrice,
+                            price: price,
                             description: descricao,
                         });
                     }}

@@ -18,7 +18,9 @@ import {
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { cartItemCount, numMesa, fetchCartItemCount, fetchNumMesa } = useContext(CartContext);
+  const { cartItemCount, fetchCartItemCount, fetchNumMesa, fetchItems, vendaId, venda } = useContext(CartContext);
+
+  const { id } = router.query;
 
   const memoizedFetchCartItemCount = useCallback(() => {
     fetchCartItemCount();
@@ -31,20 +33,32 @@ const Header: React.FC = () => {
   useEffect(() => {
     memoizedFetchCartItemCount();
     memoizedFetchNumMesa();
-  }, [memoizedFetchCartItemCount, memoizedFetchNumMesa, cartItemCount]);
+  }, [memoizedFetchCartItemCount, memoizedFetchNumMesa]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [vendaId]);
+
+  const handleNavigation = (route: string) => {
+    if (id) {
+      router.push(`${route}/${id}`);
+    } else {
+      router.push(route);
+    }
+  };
 
   return (
     <HeaderContainer>
       <HeaderContent>
-        <HeaderContentTable onClick={() => router.push('/cardapio')}>
+        <HeaderContentTable onClick={() => handleNavigation('/cardapio')}>
           <IconCircle>
             <FontAwesomeIcon icon={faConciergeBell} size="lg" color="#A3A2A2" width={18} height={18} />
           </IconCircle>
-          <Text>Mesa {numMesa}</Text>
+          {id ? (<Text>Mesa {id}</Text>) : (<Text>Home</Text>)}
         </HeaderContentTable>
 
         <HeaderContentInfor>
-          <HeaderContentInforOrder onClick={() => router.push('/cart')}>
+          <HeaderContentInforOrder onClick={() => handleNavigation('/cart')}>
             <IconCircle>
               <OrderCount>{cartItemCount}</OrderCount>
               <FontAwesomeIcon icon={faCartPlus} size="lg" color="#A3A2A2" width={18} height={18} />
@@ -52,12 +66,14 @@ const Header: React.FC = () => {
             <Text>Pedido</Text>
           </HeaderContentInforOrder>
 
-          <HeaderContentTotal onClick={() => router.push('/myaccount')}>
-            <IconCircle>
-              <FontAwesomeIcon icon={faHandHoldingUsd} size="lg" color="#A3A2A2" width={18} height={18} />
-            </IconCircle>
-            <Text>Conta</Text>
-          </HeaderContentTotal>
+          {venda && venda.length > 0 && (
+            <HeaderContentTotal onClick={() => handleNavigation('/myaccount')}>
+              <IconCircle>
+                <FontAwesomeIcon icon={faHandHoldingUsd} size="lg" color="#A3A2A2" width={18} height={18} />
+              </IconCircle>
+              <Text>Conta</Text>
+            </HeaderContentTotal>
+          )}
         </HeaderContentInfor>
       </HeaderContent>
     </HeaderContainer>

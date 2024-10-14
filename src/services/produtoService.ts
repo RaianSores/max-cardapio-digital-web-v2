@@ -4,7 +4,7 @@ import { IProduto } from '../@types/Produto';
 export const getProdutos = async (idGrupo: number): Promise<IProduto[]> => {
   try {
     const response = await api.get<{ docs: IProduto[] }>(
-      `/produto/consultar?grupo_id=${idGrupo}`,
+      `/produto?grupo_id=${idGrupo}`,
     );
     return response.data.docs;
   } catch (error) {
@@ -15,7 +15,7 @@ export const getProdutos = async (idGrupo: number): Promise<IProduto[]> => {
 export const getProdutosPromocoes = async (): Promise<IProduto[]> => {
   try {
     const response = await api.get<{ docs: IProduto[] }>(
-      `/promocoes/consultar`,
+      `/promocoes`,
     );
     return response.data.docs;
   } catch (error) {

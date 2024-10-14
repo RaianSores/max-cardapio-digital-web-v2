@@ -11,15 +11,17 @@ export const ModalOverlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  max-width: 520px !important;
+  margin: 0 auto !important;
 `;
 
 export const ModalContainer = styled.div`
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  max-width: 500px;
-  width: 90%;
-  height: 50%;
+  max-width: 90%;
+  width: 80%;
+  height: 30%;
   position: relative;
 `;
 

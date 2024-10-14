@@ -7,12 +7,9 @@ export const ProductCardContainer = styled.div`
   color: #000;
   flex-direction: row;
   align-items: flex-start;
-  padding: 6px;
-  gap: 10px;
-  height: 85px;
-  width: 350px;
-  max-height: 85px;
-  max-width: 350px;
+  padding: 1%;
+  gap: 2%;
+  max-width: 100%;
   margin-bottom: 0.4rem;
 `;
 

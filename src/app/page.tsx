@@ -7,7 +7,7 @@ const HomePage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/config');
+    router.push('/cardapio');
   }, [router]);
 
   return null;

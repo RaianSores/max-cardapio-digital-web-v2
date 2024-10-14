@@ -12,7 +12,7 @@ export const ContentInfoActions = styled.div`
   align-items: center;
   width: 100%;
   padding: 10px 0;
-  border-bottom: 1px solid #ddd;
+  //border-bottom: 1px solid #ddd;
 `;
 
 export const Title = styled.h1`

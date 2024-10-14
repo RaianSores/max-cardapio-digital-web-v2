@@ -10,7 +10,7 @@ export const Container = styled.div`
 export const ActionCardContent = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 80px; 
+  padding-bottom: 80px;
 `;
 
 export const ActionsCardHeader = styled.div`
@@ -30,20 +30,22 @@ export const ActionsCardTitle = styled.h1`
 `;
 
 export const ActionsCardBack = styled.button`
-  color: #ffa500;
+  font-size: 18px;
   font-weight: bold;
-  font-size: 20px;
-  margin-left: 5px;
-  cursor: pointer;
-  background-color: transparent;
+  height: 30px;
+  width: 20%;
+  margin-right: 2%;
+  background-color: #f38321;
   border: none;
+  border-radius: 3px;
+  cursor: pointer;
 `;
 
 export const ActionCard = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; 
+  justify-content: space-between;
   background-color: #ddd;
   margin: 8px;
   border-radius: 5px;
@@ -151,4 +153,16 @@ export const ClearButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+`;
+
+export const CardEmpty = styled.div`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+`;
+
+export const CardEmptyText = styled.p`
+  font-size: 18px;
+  color: #363539;
 `;

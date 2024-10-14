@@ -10,7 +10,8 @@ export const Container = styled.div`
 export const ActionCardContent = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 80px; 
+  max-height: calc(100vh - 160px);
+  padding-bottom: 80px;
 `;
 
 export const ActionsCardHeader = styled.div`
@@ -25,18 +26,20 @@ export const ActionsCardHeader = styled.div`
 `;
 
 export const ActionsCardTitle = styled.h1`
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
 `;
 
 export const ActionsCardBack = styled.button`
-  color: #ffa500;
+  font-size: 18px;
   font-weight: bold;
-  font-size: 20px;
-  margin-left: 5px;
-  cursor: pointer;
-  background-color: transparent;
+  height: 30px;
+  width: 20%;
+  margin-right: 2%;
+  background-color: #f38321;
   border: none;
+  border-radius: 3px;
+  cursor: pointer;
 `;
 
 export const ActionCard = styled.div`

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
+import Image from 'next/image';
 import Header from '../Header/Header';
 import {
     ActionCard,
@@ -18,45 +19,25 @@ import {
     TableColRigth,
     ActionCardInvoiceFooter,
     ConfirmButton,
-    ClearButton
 } from './styles';
 import { useRouter } from 'next/navigation';
-import StorageService from '@/utils/StorageService';
 import { formatPrice } from '@/utils/format';
-
-type CartItem = {
-    id: number;
-    quantity: number;
-    price: number;
-    description: string;
-    image?: string;
-};
+import { CartContext } from '@/context/CartContext';
 
 const MyAccount: React.FC = () => {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { vendaId, venda, fetchItems, numMesa } = useContext(CartContext);
     const router = useRouter();
 
     useEffect(() => {
-        fetchCartItems();
-    }, []);
+        fetchItems();
+    }, [vendaId]);
 
-    const fetchCartItems = async () => {
-        try {
-            const items = await StorageService.getItem("cartItems");
-            if (items) {
-                setCartItems(JSON.parse(items));
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
     return (
         <Container>
             <Header />
             <ActionsCardHeader>
-                <ActionsCardTitle>Minha Conta |</ActionsCardTitle>
                 <ActionsCardBack onClick={() => router.back()}>Voltar</ActionsCardBack>
+                <ActionsCardTitle>| Minha Conta</ActionsCardTitle>
             </ActionsCardHeader>
             <ActionCard>
                 <ActionCardHeaderList>
@@ -66,21 +47,33 @@ const MyAccount: React.FC = () => {
                     <TableColRigth><RegTable>Vlr Total</RegTable></TableColRigth>
                 </ActionCardHeaderList>
                 <ActionCardContent>
-                    {cartItems.map((item, index) => (
-                        <ActionCardInvoiceTableRow key={index}>
-                            <DescriptionCard>{item.description}</DescriptionCard>
-                            <PriceCard>{formatPrice(item.price)}</PriceCard>
-                            <QuantityCard>{item.quantity}</QuantityCard>
-                            <TotalPriceCard>{formatPrice(item.price * item.quantity)}</TotalPriceCard>
-                        </ActionCardInvoiceTableRow>
-                    ))}
+                    {venda && venda.length > 0 ? (
+                        venda.map((singleVenda, vendaIndex) => (
+                            <React.Fragment key={vendaIndex}>
+                                {singleVenda.itens && singleVenda.itens.length > 0 ? (
+                                    singleVenda.itens.map((item, index) => (
+                                        <ActionCardInvoiceTableRow key={index}>
+                                            <DescriptionCard>{item.descricaoProd}</DescriptionCard>
+                                            <PriceCard>{formatPrice(item.valor)}</PriceCard>
+                                            <QuantityCard>{item.qtde}</QuantityCard>
+                                            <TotalPriceCard>{formatPrice(item.valor * item.qtde)}</TotalPriceCard>
+                                        </ActionCardInvoiceTableRow>
+                                    ))
+                                ) : (
+                                    <p>Sem itens na venda {singleVenda.id}</p>
+                                )}
+                            </React.Fragment>
+                        ))
+                    ) : (
+                        <></>
+                    )}
                 </ActionCardContent>
                 <ActionCardInvoiceFooter>
                     <ConfirmButton>Solicitar Conta</ConfirmButton>
                 </ActionCardInvoiceFooter>
             </ActionCard>
         </Container>
-    )
+    );
 }
 
 export default MyAccount;

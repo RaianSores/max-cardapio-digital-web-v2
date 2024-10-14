@@ -30,11 +30,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   priceFinal,
   priceDiscount,
 }) => {
-  const { isModalOpen, setIsModalOpen } = useContext(CartContext);
+  const { isModalOpen, setIsModalOpen, setSelectedProduct, selectedProduct } = useContext(CartContext);
   const temPromocao = priceDiscount && priceDiscount < priceFinal;
 
   const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+    // Armazenar o produto selecionado no contexto
+    setSelectedProduct({
+      proID,
+      foto,
+      descricao,
+      priceFinal,
+      priceDiscount,
+    });
+    setIsModalOpen(true); // Abre o modal
   };
 
   return (
@@ -51,7 +59,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
           height={75}
           objectFit="cover"
           style={{ borderRadius: "9px" }}
-
         />
         <ProductCardInfo>
           <ProductCardTitle>{descricao}</ProductCardTitle>
@@ -69,14 +76,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </PriceContainer>
         </ProductCardInfo>
       </ProductCardContainer>
-      <Modal isOpen={isModalOpen} onClose={toggleModal}>
-        <ProductSection 
-          proID={proID}
-          descricao={descricao}
-          priceFinal={priceFinal}
-          priceDiscount={priceDiscount}
-        />
-      </Modal>
+
+      {isModalOpen && selectedProduct && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <ProductSection
+            proID={selectedProduct.proID}
+            descricao={selectedProduct.descricao}
+            priceFinal={selectedProduct.priceFinal}
+            priceDiscount={selectedProduct.priceDiscount}
+          />
+        </Modal>
+      )}
     </>
   );
 };

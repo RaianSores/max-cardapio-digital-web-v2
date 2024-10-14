@@ -25,6 +25,7 @@
     --button-primary-hover: #ccc;
     --button-secondary-hover: #1a1a1a;
   }
+  
 }
 
 .main {
@@ -80,7 +81,7 @@
 
 a.primary {
   background: var(--foreground);
-  color: var(--background);
+  color: #3e3e3e;
   gap: 8px;
 }
 

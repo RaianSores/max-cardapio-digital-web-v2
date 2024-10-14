@@ -1,25 +1,23 @@
 export interface Venda {
-  numMesa: string;
+  numMesa: number;
   operador: number;
-  tipo: string;
   pediuConta?: number;
-  venda: {
-    id?: number;
-    clienteId: number;
-    tipo: string;
-    atendente?: number;
-    status?: string;
-    abertura?: string;
-    cfop?: number;
-    cliNome: string;
-    cpf: string;
-    totalNf?: number;
-    msg?: string;
-    vlrTotalLiqProd?: number;
-    consumidorFinal?: boolean;
-    empId?: string;
-    itens?: VendaItem[];
-  };
+  id?: number;
+  clienteId: number;
+  tipo: string;
+  tipoOrigin: string;
+  atendente?: number;
+  status?: string;
+  abertura?: string;
+  cfop?: number;
+  cliNome: string;
+  cpf: string;
+  totalNf?: number;
+  msg?: string;
+  vlrTotalLiqProd?: number;
+  consumidorFinal?: boolean;
+  empId?: string;
+  itens?: VendaItem[];
 }
 
 export interface VendaItem {
@@ -43,8 +41,8 @@ export interface IRequestAccount {
 
 export interface IPix {
   empId: number;
-  valor: number;  
-  nome?: string;  
-  cpf?: string; 
+  valor: number;
+  nome?: string;
+  cpf?: string;
   idVenda: number;
-};
+}

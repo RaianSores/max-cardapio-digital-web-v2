@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Header from '../Header/Header';
 import {
     ActionCard,
@@ -23,6 +23,9 @@ import {
 import { useRouter } from 'next/navigation';
 import StorageService from '@/utils/StorageService';
 import { formatPrice } from '@/utils/format';
+import { Venda, VendaItem } from '@/@types/Venda';
+import { CartContext } from '@/context/CartContext';
+import { sendSale } from '@/services/vendaService';
 
 type CartItem = {
     id: number;
@@ -34,7 +37,7 @@ type CartItem = {
 
 const Cart: React.FC = () => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const { atendente, empId, numMesa } = useContext(CartContext);
     const router = useRouter();
 
     useEffect(() => {
@@ -46,6 +49,8 @@ const Cart: React.FC = () => {
             const items = await StorageService.getItem("cartItems");
             if (items) {
                 setCartItems(JSON.parse(items));
+            } else {
+                setCartItems([]);
             }
         } catch (error) {
             console.error(error);
@@ -58,12 +63,77 @@ const Cart: React.FC = () => {
         router.push('/cardapio');
     };
 
+    async function sendDataSale(dataSale: Venda) {
+        try {
+            const data = await sendSale(dataSale);
+            if (data.id) {
+                await StorageService.setItem("vendaId", (data.id).toString());
+            } else {
+                await StorageService.removeItem("vendaId");
+            }
+        } catch (error) {
+
+        }
+    };
+
+    async function handleSalesItem() {
+        const jsonCartItems = await StorageService.getItem("cartItems");
+        const cart = jsonCartItems != null ? JSON.parse(jsonCartItems) : { itens: [] }
+
+        // Verificar se o cart.itens existe e se tem pelo menos um item
+        const vlrTotalLiqProd =
+            cart.itens && cart.itens.length > 0
+                ? cart.itens.reduce((total: number, item: any) => total + item.valorTotal, 0)
+                : 0;
+
+        const itensSales: VendaItem[] = cart.map((product: any) => {
+            const item: any = {
+                vendaId: 0,
+                codProduto: product.id,
+                cfop: 5102,
+                qtde: product.quantity,
+                valor: product.price,
+                descricaoProd: product.description,
+                valorTotal: product.price * product.quantity,
+                status: "A",
+                data: new Date().toISOString(),
+                un: "UN",
+                desconto: product.desconto || 0,
+            }
+
+            return item;
+        });
+
+        const orderJson: Venda = {
+            numMesa: numMesa,
+            operador: 1,
+            id: 0,
+            clienteId: 1,
+            tipo: "VE",
+            atendente: atendente,
+            status: "A",
+            tipoOrigin: "tpMesa",
+            abertura: "A",
+            cfop: 5102,
+            cliNome: "CONSUMIDOR",
+            cpf: "",
+            totalNf: vlrTotalLiqProd,
+            msg: "",
+            vlrTotalLiqProd: vlrTotalLiqProd,
+            consumidorFinal: true,
+            empId: empId || '1',
+            itens: itensSales,
+        };
+        await sendDataSale(orderJson);
+        await clearCart();
+    }
+
     return (
         <Container>
             <Header />
             <ActionsCardHeader>
-                <ActionsCardTitle>Meu Carrinho |</ActionsCardTitle>
                 <ActionsCardBack onClick={() => router.back()}>Voltar</ActionsCardBack>
+                <ActionsCardTitle>| Meu Carrinho</ActionsCardTitle>
             </ActionsCardHeader>
             <ActionCard>
                 <ActionCardHeaderList>
@@ -84,7 +154,7 @@ const Cart: React.FC = () => {
                 </ActionCardContent>
                 <ActionCardInvoiceFooter>
                     <ClearButton onClick={clearCart}>Limpar Carrinho</ClearButton>
-                    <ConfirmButton>Enviar Pedido</ConfirmButton>
+                    <ConfirmButton onClick={handleSalesItem}>Enviar Pedido</ConfirmButton>
                 </ActionCardInvoiceFooter>
             </ActionCard>
         </Container>
