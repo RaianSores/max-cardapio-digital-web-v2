@@ -7,7 +7,6 @@ import { Grupo } from "../../@types/Grupo";
 import ProductList from "../ProductList/ProductList";
 import { MenuContainer, MenuItem, MenuText, MenuTextHome, MenuTextPromo } from "./styles";
 
-// Alterar o require para import
 import defaultImage from "../../assets/img/sem-foto.jpg";
 
 interface MenuProps {

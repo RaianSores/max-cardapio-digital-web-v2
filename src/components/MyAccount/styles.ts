@@ -38,6 +38,7 @@ export const ActionsCardBack = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 3px;
+  color: #FFF;
   cursor: pointer;
 `;
 
@@ -141,6 +142,7 @@ export const ConfirmButton = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 5px;
+  color: #FFF;
   cursor: pointer;
 `;
 

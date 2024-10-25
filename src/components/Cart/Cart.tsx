@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import Header from '../Header/Header';
 import {
     ActionCard,
@@ -20,7 +22,7 @@ import {
     ConfirmButton,
     ClearButton
 } from './styles';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import StorageService from '@/utils/StorageService';
 import { formatPrice } from '@/utils/format';
 import { Venda, VendaItem } from '@/@types/Venda';
@@ -36,9 +38,11 @@ type CartItem = {
 };
 
 const Cart: React.FC = () => {
-    const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const { atendente, empId, numMesa } = useContext(CartContext);
     const router = useRouter();
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const { atendente, empId, numMesa, fetchCartItemCount } = useContext(CartContext);
+
+    const { id } = router.query;
 
     useEffect(() => {
         fetchCartItems();
@@ -57,10 +61,25 @@ const Cart: React.FC = () => {
         }
     };
 
+    const handleNavigation = (route: string) => {
+        if (id) {
+            router.push(`${route}/${id}`);
+        } else {
+            router.push(route);
+        }
+    };
+
+    const removeCartItem = async (itemId: number) => {
+        const updatedCartItems = cartItems.filter(item => item.id !== itemId);
+        setCartItems(updatedCartItems);
+        await StorageService.setItem("cartItems", JSON.stringify(updatedCartItems));
+        fetchCartItemCount();
+    };
+
     const clearCart = async () => {
         await StorageService.removeItem("cartItems");
         await fetchCartItems();
-        router.push('/cardapio');
+        handleNavigation('/cardapio');
     };
 
     async function sendDataSale(dataSale: Venda) {
@@ -144,12 +163,15 @@ const Cart: React.FC = () => {
                 </ActionCardHeaderList>
                 <ActionCardContent>
                     {cartItems.map((item, index) => (
-                        <ActionCardInvoiceTableRow key={index}>
-                            <DescriptionCard>{item.description}</DescriptionCard>
-                            <PriceCard>{formatPrice(item.price)}</PriceCard>
-                            <QuantityCard>{item.quantity}</QuantityCard>
-                            <TotalPriceCard>{formatPrice(item.price * item.quantity)}</TotalPriceCard>
-                        </ActionCardInvoiceTableRow>
+                        <>
+                            <ActionCardInvoiceTableRow key={index}>
+                                <DescriptionCard>{item.description}</DescriptionCard>
+                                <PriceCard>{formatPrice(item.price)}</PriceCard>
+                                <QuantityCard>{item.quantity}</QuantityCard>
+                                <TotalPriceCard>{formatPrice(item.price * item.quantity)}</TotalPriceCard>
+                            <FontAwesomeIcon icon={faTrash} size="2x" color="#4d4b4b" width={20} height={20} onClick={() => removeCartItem(item.id)} />
+                            </ActionCardInvoiceTableRow>
+                        </>
                     ))}
                 </ActionCardContent>
                 <ActionCardInvoiceFooter>

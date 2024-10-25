@@ -39,6 +39,7 @@ export const ActionsCardBack = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 3px;
+  color: #FFF;
   cursor: pointer;
 `;
 
@@ -118,6 +119,7 @@ export const TotalPriceCard = styled.p`
   font-size: 14px;
   color: #363539;
   text-align: right;
+  margin-right: 5px;
 `;
 
 export const ActionCardInvoiceFooter = styled.div`
@@ -142,6 +144,7 @@ export const ConfirmButton = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 5px;
+  color: #FFF;
   cursor: pointer;
 `;
 
@@ -153,5 +156,6 @@ export const ClearButton = styled.button`
   background-color: #03a371;
   border: none;
   border-radius: 5px;
+  color: #FFF;
   cursor: pointer;
 `;

@@ -34,7 +34,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const temPromocao = priceDiscount && priceDiscount < priceFinal;
 
   const toggleModal = () => {
-    // Armazenar o produto selecionado no contexto
     setSelectedProduct({
       proID,
       foto,
@@ -42,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       priceFinal,
       priceDiscount,
     });
-    setIsModalOpen(true); // Abre o modal
+    setIsModalOpen(true);
   };
 
   return (

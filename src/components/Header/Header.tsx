@@ -7,7 +7,6 @@ import { CartContext } from "../../context/CartContext";
 import {
   HeaderContainer,
   HeaderContent,
-  IconCircle,
   HeaderContentTable,
   HeaderContentInfor,
   HeaderContentInforOrder,
@@ -15,33 +14,28 @@ import {
   HeaderContentTotal,
   Text,
 } from "./styles";
+import { encryptBase64 } from "@/utils/hash";
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { cartItemCount, fetchCartItemCount, fetchNumMesa, fetchItems, vendaId, venda } = useContext(CartContext);
-
-  const { id } = router.query;
+  const { cartItemCount, fetchCartItemCount, fetchItems, vendaId, numMesa, cartItems } = useContext(CartContext);
 
   const memoizedFetchCartItemCount = useCallback(() => {
     fetchCartItemCount();
   }, [fetchCartItemCount]);
 
-  const memoizedFetchNumMesa = useCallback(() => {
-    fetchNumMesa();
-  }, [fetchNumMesa]);
-
   useEffect(() => {
     memoizedFetchCartItemCount();
-    memoizedFetchNumMesa();
-  }, [memoizedFetchCartItemCount, memoizedFetchNumMesa]);
+  }, [memoizedFetchCartItemCount]);
 
   useEffect(() => {
     fetchItems();
   }, [vendaId]);
 
   const handleNavigation = (route: string) => {
-    if (id) {
-      router.push(`${route}/${id}`);
+    if (numMesa) {
+      const hashMesa = encryptBase64(numMesa.toString()); 
+      router.push(`${route}/${hashMesa}`);  
     } else {
       router.push(route);
     }
@@ -51,29 +45,21 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <HeaderContent>
         <HeaderContentTable onClick={() => handleNavigation('/cardapio')}>
-          <IconCircle>
-            <FontAwesomeIcon icon={faConciergeBell} size="lg" color="#A3A2A2" width={18} height={18} />
-          </IconCircle>
-          {id ? (<Text>Mesa {id}</Text>) : (<Text>Home</Text>)}
+          <FontAwesomeIcon icon={faConciergeBell} size="2x" color="#A3A2A2" width={32} height={32} />
+          {numMesa ? (<Text>Mesa {numMesa}</Text>) : (<Text>Home</Text>)}
         </HeaderContentTable>
 
         <HeaderContentInfor>
           <HeaderContentInforOrder onClick={() => handleNavigation('/cart')}>
-            <IconCircle>
-              <OrderCount>{cartItemCount}</OrderCount>
-              <FontAwesomeIcon icon={faCartPlus} size="lg" color="#A3A2A2" width={18} height={18} />
-            </IconCircle>
+            {cartItemCount ? <OrderCount>{cartItemCount}</OrderCount> : null}
+            <FontAwesomeIcon icon={faCartPlus} size="2x" color="#A3A2A2" width={32} height={32} />
             <Text>Pedido</Text>
           </HeaderContentInforOrder>
 
-          {venda && venda.length > 0 && (
-            <HeaderContentTotal onClick={() => handleNavigation('/myaccount')}>
-              <IconCircle>
-                <FontAwesomeIcon icon={faHandHoldingUsd} size="lg" color="#A3A2A2" width={18} height={18} />
-              </IconCircle>
-              <Text>Conta</Text>
-            </HeaderContentTotal>
-          )}
+          <HeaderContentTotal onClick={() => handleNavigation('/myaccount')}>
+            <FontAwesomeIcon icon={faHandHoldingUsd} size="2x" color="#A3A2A2" width={32} height={32} />
+            <Text>Conta</Text>
+          </HeaderContentTotal>
         </HeaderContentInfor>
       </HeaderContent>
     </HeaderContainer>

@@ -25,12 +25,19 @@ import { formatPrice } from '@/utils/format';
 import { CartContext } from '@/context/CartContext';
 
 const MyAccount: React.FC = () => {
-    const { vendaId, venda, fetchItems, numMesa } = useContext(CartContext);
+    const { numMesa, venda, fetchItems, fetchConfigurations } = useContext(CartContext);
     const router = useRouter();
 
     useEffect(() => {
+        if (numMesa) {
+          fetchConfigurations();
+        }
+      }, [numMesa]);
+
+    useEffect(() => {
         fetchItems();
-    }, [vendaId]);
+    }, [numMesa]);
+
 
     return (
         <Container>

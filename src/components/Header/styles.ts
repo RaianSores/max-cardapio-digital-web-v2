@@ -9,7 +9,7 @@ export const HeaderContainer = styled.div`
 `;
 
 export const HeaderContent = styled.div`
-  flex: 5;
+  flex: 1;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -62,14 +62,14 @@ export const HeaderContentTotal = styled.div`
 `;
 
 export const Text = styled.div`
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   color: #a3a2a2;
 `;
 
 export const OrderCount = styled.div`
   position: absolute;
-  top: -2px;
+  top: -3px;
   left: 1px;
   background-color: #ffa500;
   color: #fff;

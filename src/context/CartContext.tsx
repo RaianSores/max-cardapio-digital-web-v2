@@ -1,10 +1,13 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { useRouter } from 'next/router';
 import { getItemsMesa } from "../services/contaService";
 import { getCartItemCount } from '../utils/cartUtils';
 import { Conta } from '../@types/Conta';
 import StorageService from '../utils/StorageService';
 import { Venda } from '@/@types/Venda';
 import { getSale } from '@/services/vendaService';
+import axios from 'axios';
+import { getEmpresa } from '@/services/empresaService';
 
 interface ICartProviderProps {
     children: ReactNode;
@@ -25,7 +28,7 @@ type ProductCardProps = {
     descricao: string;
     priceFinal: number;
     priceDiscount?: number;
-  };
+};
 
 interface ICartContextData {
     cartItems: CartItem[];
@@ -41,6 +44,7 @@ interface ICartContextData {
     setNumeroMesa: React.Dispatch<React.SetStateAction<number | null>>;
     fetchNumeroMesa: () => void;
     fetchItems: () => void;
+    fetchConfigurations: () => void;
     fetchCartItems: (numeroMesa: number) => void;
     numMesa: number;
     setNumMesa: React.Dispatch<React.SetStateAction<number>>;
@@ -63,15 +67,16 @@ interface ICartContextData {
     setIsModalOpen: (value: boolean) => void;
     selectedProduct: ProductCardProps | null;
     setSelectedProduct: (product: ProductCardProps | null) => void;
-    vendaId: number; 
+    vendaId: number;
     setVendaId: React.Dispatch<React.SetStateAction<number>>;
-    venda: Venda[]; 
+    venda: Venda[];
     setVenda: React.Dispatch<React.SetStateAction<Venda[]>>;
 }
 
 export const CartContext = createContext<ICartContextData>({} as ICartContextData);
 
 export const CartProvider = ({ children }: ICartProviderProps) => {
+    const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [totalPedido, setTotalPedido] = useState(0);
     const [totalServico, setTotalServico] = useState(0);
@@ -87,8 +92,10 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     const [temContaMaxDigital, setTemContaMaxDigital] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<ProductCardProps | null>(null);
-    const [vendaId, setVendaId] = useState<number>(0);  
+    const [vendaId, setVendaId] = useState<number>(0);
     const [venda, setVenda] = useState<Venda[]>([]);
+
+    const { id } = router.query;
 
     function calcularTotais() {
         let pedido = 0;
@@ -112,7 +119,6 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     async function fetchNumeroMesa() {
         try {
             const mesa = await StorageService.getItem("numMesa");
-            console.log(mesa)
             if (mesa !== null) {
                 setNumeroMesa(parseInt(mesa));
             }
@@ -122,27 +128,24 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     };
 
     const fetchItems = async () => {
-        try {
-            const vedId = await StorageService.getItem("vendaId");
-            if (vedId) {
-                console.log('fetchItems',numMesa)
-                const vendaData = await getSale(parseInt(vedId), numMesa);
-                
-                if (vendaData && vendaData.length > 0) {
-                    setVenda(vendaData);
-                } else {
-                    setVenda([]);   
-                }
+        const vedId = await StorageService.getItem("vendaId");
+        const numero = await StorageService.getItem("numMesa");
+
+        if (numero) {
+            const vendaData = await getSale(vedId ? parseInt(vedId) : undefined, parseInt(numero));
+
+            if (vendaData && vendaData.length > 0) {
+                setVenda(vendaData);
+            } else {
+                setVenda([]);
             }
-        } catch (error) {
-            console.error(error);
         }
     };
 
     async function fetchCartItems(numeroMesa: number) {
         try {
             const items: Conta[] = await getItemsMesa(numeroMesa);
-    
+
             // Mapear os itens de Conta para CartItem, adicionando a propriedade `id`
             const cartItems: CartItem[] = items.map((item, index) => ({
                 id: index, // ou qualquer lógica para gerar um ID
@@ -152,18 +155,17 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 desconto: item.desconto,
                 vlrOutrasDesp: item.vlrOutrasDesp,
             }));
-    
+
             setCartItems(cartItems.length === 0 ? [] : cartItems);
         } catch (error) {
             console.error("Erro ao buscar itens da mesa", error);
         }
     }
-    
 
     const fetchCartItemCount = async () => {
         const itemCount = await getCartItemCount();
         setCartItemCount(itemCount);
-    };
+    };   
 
     const fetchNumMesa = async () => {
         try {
@@ -187,6 +189,53 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             console.error("Erro ao buscar dados do usuário", error);
         }
     };
+
+    const fetchConfigurations = async () => {
+        try {
+            // Obtém os dados da empresa da API
+            const empresas = await getEmpresa();
+    
+            // Supondo que a primeira empresa seja a desejada
+            if (empresas.length > 0) {
+                const empresa = empresas[0];
+    
+                // Armazenando as configurações obtidas da API
+                await StorageService.setItem("ipUrl", empresa.IpUrl);
+                await StorageService.setItem("porta", empresa.Porta);
+                await StorageService.setItem("idEmpresa", empresa.EmpID.toString());
+                await StorageService.setItem("idVendedor", empresa.UserPadrao);
+    
+                // Verificação se `id` está indefinido
+                if (typeof id === 'undefined') {
+                    await StorageService.removeItem("numMesa");
+                    setNumMesa(0);
+                } else {
+                    const value = await StorageService.getItem("numMesa");
+                    if (value !== numMesa.toString()) {
+                        await StorageService.removeItem("vendaId");
+                        await StorageService.setItem("numMesa", numMesa.toString());
+                        console.log('value:', value, 'numMesa:', numMesa.toString());
+                        setNumMesa(numMesa);
+                    }
+                }
+    
+                setAtendente(parseInt(empresa.UserPadrao));
+                setEmpId(empresa.EmpID.toString());
+    
+                // Fazendo requisição de autenticação com os dados da empresa
+                try {
+                    const response = await axios.get(`http://${empresa.IpUrl}:${empresa.Porta}/v2/auth`);
+                    await StorageService.setItem("token", response.data.token);
+                } catch (error) {
+                    console.error("Erro ao autenticar", error);
+                }
+            } else {
+                console.error("Nenhuma empresa encontrada.");
+            }
+        } catch (error) {
+            console.error("Erro ao buscar configurações da empresa:", error);
+        }
+    };  
 
     return (
         <CartContext.Provider
@@ -221,15 +270,16 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 setTaxaServico,
                 desconto,
                 setDesconto,
-                isModalOpen, 
-                setIsModalOpen, 
-                selectedProduct, 
+                isModalOpen,
+                setIsModalOpen,
+                selectedProduct,
                 setSelectedProduct,
-                vendaId, 
+                vendaId,
                 setVendaId,
-                venda, 
+                venda,
                 setVenda,
-                fetchItems
+                fetchItems,
+                fetchConfigurations
             }}
         >
             {children}

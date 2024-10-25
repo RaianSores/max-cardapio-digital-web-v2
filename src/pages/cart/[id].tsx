@@ -1,19 +1,22 @@
+import React, { useEffect, useContext } from 'react';
+import { GetServerSideProps } from 'next';
 import Cart from '@/components/Cart/Cart';
-import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import { CartContext } from '@/context/CartContext';
+import { handleMesaRedirect } from '@/utils/handleMesaRedirect';
 
-const CartId: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query;
+const CartId: React.FC<{ numMesa: number }> = ({ numMesa }) => {
+  const { setNumMesa } = useContext(CartContext);
 
   useEffect(() => {
-    if (id) {
-      console.log('Mesa selecionada:', id);
-    }
-  }, [id]);
+    setNumMesa(numMesa);
+  }, [numMesa]);
   return (
     <Cart />
   );
 };
 
 export default CartId;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  return await handleMesaRedirect(context);
+};

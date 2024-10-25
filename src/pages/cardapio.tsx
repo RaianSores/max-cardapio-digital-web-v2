@@ -1,24 +1,23 @@
+// src/pages/cardapio/cardapio.tsx
+import React, { useEffect, useContext } from 'react';
 import Head from 'next/head';
 import Home from '@/components/Home/Home';
-import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import { CartContext } from '@/context/CartContext';
 
 const CardapioPage: React.FC = () => {
-  const router = useRouter();
-  const { id } = router.query;
+  const { setNumMesa } = useContext(CartContext);
 
   useEffect(() => {
-    if (id) {
+    // Definir numMesa como 0 quando o parâmetro id não está presente
+    setNumMesa(0);
+  }, []);
 
-      console.log('Mesa selecionada:', id);
-    }
-  }, [id]);
   return (
     <>
       <Head>
         <title>Max-Food | Cardápio Digital</title>
         <meta name="description" content="Max-Food" />
-        <link rel="icon" href="./favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <Home />
     </>

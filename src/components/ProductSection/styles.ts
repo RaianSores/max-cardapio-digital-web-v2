@@ -12,7 +12,6 @@ export const ContentInfoActions = styled.div`
   align-items: center;
   width: 100%;
   padding: 10px 0;
-  //border-bottom: 1px solid #ddd;
 `;
 
 export const Title = styled.h1`
@@ -46,6 +45,7 @@ export const DecreaseButton = styled.button`
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   border: none;
+  color: #FFF;
   cursor: pointer;
 `;
 
@@ -58,6 +58,7 @@ export const IncreaseButton = styled.button`
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   border: none;
+  color: #FFF;
   cursor: pointer;
 `;
 
@@ -69,6 +70,7 @@ export const ConfirmButton = styled.button`
   height: 60px;
   font-size: 20px;
   margin-left: 10px;
+  color: #FFF;
   cursor: pointer;
 `;
 

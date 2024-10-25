@@ -14,7 +14,7 @@ export const sendSale = async (venda: Venda): Promise<Venda> => {
   }
 };
 
-export const getSale = async (id: number, numMesa: number): Promise<Venda[]> => {
+export const getSale = async (id: number | undefined, numMesa: number): Promise<Venda[]> => {
   try {
     const response = await api.get(`/venda`, {
       params: { id, numMesa },
@@ -29,6 +29,7 @@ export const getSale = async (id: number, numMesa: number): Promise<Venda[]> => 
     throw error;
   }
 };
+
 
 export const solicitarConta = async (
   venda: IRequestAccount
