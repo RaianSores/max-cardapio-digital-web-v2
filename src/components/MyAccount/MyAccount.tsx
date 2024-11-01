@@ -1,5 +1,6 @@
-import React, { useEffect, useContext } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useContext, } from 'react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons";
 import Header from '../Header/Header';
 import {
     ActionCard,
@@ -10,6 +11,7 @@ import {
     ActionsCardHeader,
     ActionsCardTitle,
     Container,
+    ContainerConta,
     DescriptionCard,
     PriceCard,
     QuantityCard,
@@ -19,34 +21,77 @@ import {
     TableColRigth,
     ActionCardInvoiceFooter,
     ConfirmButton,
+    ActionPrice,
+    LineItem,
+    Title,
+    Price,
 } from './styles';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '@/utils/format';
 import { CartContext } from '@/context/CartContext';
+import { solicitarConta } from '@/services/vendaService';
+import StorageService from '@/utils/StorageService';
 
 const MyAccount: React.FC = () => {
-    const { numMesa, venda, fetchItems, fetchConfigurations } = useContext(CartContext);
     const router = useRouter();
+    const {
+        venda,
+        totalPedido,
+        desconto,
+        totalServico,
+        totalFinal,
+        isContaSolicitada,
+        fetchItems,
+        calcularTotais
+    } = useContext(CartContext);
 
     useEffect(() => {
-        if (numMesa) {
-          fetchConfigurations();
-        }
-      }, [numMesa]);
+        init();
+    }, []);
 
-    useEffect(() => {
+    async function init() {
         fetchItems();
-    }, [numMesa]);
+        calcularTotais();
+    };
 
+    async function handleRequestAccount() {
+        const id = await StorageService.getItem("vendaId");
+        if (id) {
+            await solicitarConta(parseInt(id), true);
+            fetchItems();
+        };
+    };
+
+    const ContainerToUse = isContaSolicitada ? ContainerConta : Container;
 
     return (
-        <Container>
+        <ContainerToUse>
             <Header />
             <ActionsCardHeader>
                 <ActionsCardBack onClick={() => router.back()}>Voltar</ActionsCardBack>
                 <ActionsCardTitle>| Minha Conta</ActionsCardTitle>
             </ActionsCardHeader>
             <ActionCard>
+
+                <ActionPrice>
+                    <LineItem>
+                        <Title>Total Pedido:</Title>
+                        <Price>{formatPrice(totalPedido)}</Price>
+                    </LineItem>
+                    <LineItem>
+                        <Title>+ Srv.:</Title>
+                        <Price>{formatPrice(totalServico)}</Price>
+                    </LineItem>
+                    <LineItem>
+                        <Title>- Desc.:</Title>
+                        <Price>{formatPrice(desconto)}</Price>
+                    </LineItem>
+                    <LineItem>
+                        <Title>Total Final:</Title>
+                        <Price>{formatPrice(totalFinal)}</Price>
+                    </LineItem>
+                </ActionPrice>
+
                 <ActionCardHeaderList>
                     <TableColLeft><RegTable>Descrição</RegTable></TableColLeft>
                     <TableColRigth><RegTable>Vlr Unit.</RegTable></TableColRigth>
@@ -75,12 +120,17 @@ const MyAccount: React.FC = () => {
                         <></>
                     )}
                 </ActionCardContent>
-                <ActionCardInvoiceFooter>
-                    <ConfirmButton>Solicitar Conta</ConfirmButton>
-                </ActionCardInvoiceFooter>
+                {!isContaSolicitada && (
+                    <ActionCardInvoiceFooter>
+                        <ConfirmButton onClick={handleRequestAccount}>
+                            <FontAwesomeIcon icon={faMoneyCheckDollar} size="1x" color="#FFFF" width={32} height={32} />
+                            Solicitar Conta
+                        </ConfirmButton>
+                    </ActionCardInvoiceFooter>
+                )}
             </ActionCard>
-        </Container>
+        </ContainerToUse>
     );
-}
+};
 
 export default MyAccount;

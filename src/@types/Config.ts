@@ -3,3 +3,10 @@ export interface ConfiguteService {
   TaxaServico: number;
   TemContaMaxDigital: boolean;
 }
+
+export interface ConfigHash {
+  mesa: string;
+  ipUrl: string;
+  usuPadrao: string;
+  porta: string;
+}

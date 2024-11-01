@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Image from 'next/image';
 import { Smile, Home } from "react-feather";
 import { getGrupos } from "../../services/grupoService";
@@ -8,6 +8,7 @@ import ProductList from "../ProductList/ProductList";
 import { MenuContainer, MenuItem, MenuText, MenuTextHome, MenuTextPromo } from "./styles";
 
 import defaultImage from "../../assets/img/sem-foto.jpg";
+import { CartContext } from "@/context/CartContext";
 
 interface MenuProps {
   onGrupoSelect: (groupId: number) => void;
@@ -16,10 +17,13 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = ({ onGrupoSelect, activeGroupId }) => {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
+  const { isConfigurationsLoaded } = useContext(CartContext);
 
   useEffect(() => {
-    fetchGrupos();
-  }, []);
+    if (isConfigurationsLoaded) {
+      fetchGrupos();
+    }
+  }, [isConfigurationsLoaded]);
 
   const fetchGrupos = async () => {
     try {
@@ -56,8 +60,8 @@ const Menu: React.FC<MenuProps> = ({ onGrupoSelect, activeGroupId }) => {
               alt={item.nome}
               width={50}
               height={50}
-              objectFit="cover"
               style={{ 
+                objectFit: "cover",
                 borderRadius: "9px",
                 marginRight: "5px"
               }}

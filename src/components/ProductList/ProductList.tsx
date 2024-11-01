@@ -1,19 +1,28 @@
-import React, { useEffect, useState, useCallback } from "react";
-
+import React, { 
+  useEffect, 
+  useState, 
+  useCallback, 
+  useContext 
+} from "react";
 import { getProdutos, getProdutosPromocoes } from "../../services/produtoService";
 import { IProduto } from "../../@types/Produto";
-import { LoadingContainer, ProductListContainer, ProductListContent } from "./styles";
+import { 
+  LoadingContainer, 
+  ProductListContainer, 
+  ProductListContainerConta, 
+  ProductListContent 
+} from "./styles";
 import ProductCard from "../ProductCard/ProductCard";
+import { CartContext } from "@/context/CartContext";
 
 interface ProductListProps {
   selectedGroupId: number;
-}
+};
 
 const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
   const [produtos, setProdutos] = useState<IProduto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const pedidoConta = false;
+  const { isContaSolicitada } = useContext(CartContext);
 
   const fetchProdutos = useCallback(async () => {
     setIsLoading(true);
@@ -61,12 +70,14 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
     }
   }, [selectedGroupId, fetchProdutos, fetchProdutosHome, fetchProdutosPromocoes]);
 
+  const ContainerToUse = isContaSolicitada ? ProductListContainerConta : ProductListContainer;
+
   return (
-    <ProductListContainer pedidoConta={pedidoConta}>
+    <ContainerToUse>
       {isLoading ? (
         <LoadingContainer>Carregando...</LoadingContainer>
       ) : (
-        <ProductListContent pedidoConta={pedidoConta}>           
+        <ProductListContent>           
           {produtos.map((produto) => (
             <ProductCard
               key={produto.ID}
@@ -79,7 +90,7 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
           ))}
         </ProductListContent>
       )}
-    </ProductListContainer>
+    </ContainerToUse>
   );
 };
 

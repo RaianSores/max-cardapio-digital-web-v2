@@ -7,6 +7,13 @@ export const Container = styled.div`
   background-color: #3e3e3e;
 `;
 
+export const ContainerConta = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #740c0c;
+`;
+
 export const ActionCardContent = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -38,8 +45,19 @@ export const ActionsCardBack = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 3px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #d4711c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #c56118;
+  }
 `;
 
 export const ActionCard = styled.div`
@@ -142,8 +160,19 @@ export const ConfirmButton = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 5px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #d4711c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #c56118;
+  }
 `;
 
 export const ClearButton = styled.button`
@@ -155,6 +184,18 @@ export const ClearButton = styled.button`
   border: none;
   border-radius: 5px;
   cursor: pointer;
+
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #04885e;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #04885e;
+  }
 `;
 
 export const CardEmpty = styled.div`
@@ -168,3 +209,42 @@ export const CardEmptyText = styled.p`
   font-size: 18px;
   color: #363539;
 `;
+
+export const ActionPrice = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-around;
+  background-color: #ddd;
+  padding: 10px;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 8px;
+  border-radius: 5px;
+`;
+
+export const LineItem = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 0;
+`;
+
+export const Title = styled.p`
+  font-size: 16px;
+  color: #3e3e3e;
+  font-weight: bold;
+`;
+
+export const Price = styled.p`
+  font-size: 18px;
+  color: #3e3e3e;
+  font-weight: bold;
+`;
+

@@ -21,10 +21,30 @@ export const MenuItem = styled.button`
   min-width: 100%;
   border: none;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
 
   &.promotion {
     background-color: #ffa500;
     color: #dddddd;
+
+    &:hover {
+      background-color: #ec8326;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      background-color: #ec8326;
+    }
+  }
+
+  &:hover {
+    background-color: #c4bebe;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #c4bebe;
   }
 `;
 

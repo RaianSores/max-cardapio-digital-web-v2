@@ -1,5 +1,5 @@
 import { GetServerSidePropsContext } from 'next';
-import { decryptBase64, encryptBase64 } from './hash';
+import { decryptBase64 } from './hash';
 
 export const handleMesaRedirect = async (context: GetServerSidePropsContext) => {
   const { id } = context.query;
@@ -8,7 +8,7 @@ export const handleMesaRedirect = async (context: GetServerSidePropsContext) => 
     try {
       const numeroMesa = decryptBase64(id);
 
-      if (!isNaN(parseInt(numeroMesa))) {
+      if (numeroMesa !== null && !isNaN(parseInt(numeroMesa))) {
         return {
           props: {
             numMesa: parseInt(numeroMesa),
@@ -16,10 +16,8 @@ export const handleMesaRedirect = async (context: GetServerSidePropsContext) => 
         };
       }
     } catch (error) {
-
+      console.error("Erro ao decodificar o número da mesa:", error);
     }
-
-   // const encryptedMesa = encryptBase64(id);
 
     return {
       redirect: {

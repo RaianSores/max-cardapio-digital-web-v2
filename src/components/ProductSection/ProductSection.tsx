@@ -1,4 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { 
+    useState, 
+    useEffect, 
+    useContext 
+} from 'react';
 import {
     ConfirmButton,
     Container,
@@ -19,13 +23,14 @@ type ProductProps = {
     proID: number;
     descricao: string;
     priceFinal: number;
-    priceDiscount?: number;
+    priceDiscount: number;
 };
 
 type CartItem = {
     id: number;
     quantity: number;
     price: number;
+    discount: number;
     description: string;
     image?: string;
 };
@@ -61,13 +66,14 @@ const ProductSection: React.FC<ProductProps> = ({
         }
     };
 
-    const addToCart = async ({ id, quantity, price, description, image }: CartItem) => {
+    const addToCart = async ({ id, quantity, price, discount, description, image }: CartItem) => {
         const newItem = {
             id: id,
             quantity,
             price,
+            discount,
             description,
-            image
+            image,
         };
 
         try {
@@ -79,7 +85,7 @@ const ProductSection: React.FC<ProductProps> = ({
             setIsModalOpen(false);
         } catch (error) {
             console.error("Erro ao adicionar item ao carrinho:", error);
-        }
+        };
     };
 
     return (
@@ -100,10 +106,13 @@ const ProductSection: React.FC<ProductProps> = ({
                         const price = priceDiscount && priceDiscount < priceFinal
                             ? priceDiscount
                             : priceFinal;
+
+                        const priceDiscoun = priceFinal - priceDiscount   
                         addToCart({
                             id: proID,
                             quantity,
                             price: price,
+                            discount: priceDiscoun || 0,
                             description: descricao,
                         });
                     }}

@@ -6,6 +6,7 @@ import { CartContext } from "../../context/CartContext";
 
 import {
   HeaderContainer,
+  HeaderContainerConta,
   HeaderContent,
   HeaderContentTable,
   HeaderContentInfor,
@@ -14,11 +15,17 @@ import {
   HeaderContentTotal,
   Text,
 } from "./styles";
-import { encryptBase64 } from "@/utils/hash";
+import { encryptBase64Mesa, encryptBase64Porta, encryptBase64Url } from "@/utils/hash";
+import StorageService from "@/utils/StorageService";
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const { cartItemCount, fetchCartItemCount, fetchItems, vendaId, numMesa, cartItems } = useContext(CartContext);
+  const {
+    cartItemCount,
+    isContaSolicitada,
+    numMesa,
+    fetchCartItemCount
+  } = useContext(CartContext);
 
   const memoizedFetchCartItemCount = useCallback(() => {
     fetchCartItemCount();
@@ -28,21 +35,41 @@ const Header: React.FC = () => {
     memoizedFetchCartItemCount();
   }, [memoizedFetchCartItemCount]);
 
-  useEffect(() => {
-    fetchItems();
-  }, [vendaId]);
+  const handleNavigation = async (route: string) => {
+    const mesa = await StorageService.getItem("numMesa") || "";
+    const ipUrl = await StorageService.getItem("ipUrl") || "";
+    const porta = await StorageService.getItem("porta") || "";
 
-  const handleNavigation = (route: string) => {
-    if (numMesa) {
-      const hashMesa = encryptBase64(numMesa.toString()); 
-      router.push(`${route}/${hashMesa}`);  
-    } else {
-      router.push(route);
+    if (!mesa || !ipUrl || !porta) {
+      console.error("Valores insuficientes para construir a URL.");
+      return;
+    }
+
+    try {
+      const mesaEncrypted = encryptBase64Mesa(mesa);
+      const portaEncrypted = encryptBase64Porta(porta);
+      const urlEncrypted = encryptBase64Url(ipUrl);
+
+      const urlPath = `${route}/m${mesaEncrypted}`;
+      const urlQuery = `?ig=${urlEncrypted}&u=${portaEncrypted}&p=${portaEncrypted}`;
+      const fullUrl = `${urlPath}${urlQuery}`;
+
+      router.push(
+        {
+          pathname: route,
+          query: { m: mesaEncrypted, ig: urlEncrypted, u: mesaEncrypted, p: portaEncrypted }
+        },
+        fullUrl
+      );
+    } catch (error) {
+      console.error("Erro ao construir a URL de navegação:", error);
     }
   };
 
+  const ContainerToUse = isContaSolicitada ? HeaderContainerConta : HeaderContainer;
+
   return (
-    <HeaderContainer>
+    <ContainerToUse>
       <HeaderContent>
         <HeaderContentTable onClick={() => handleNavigation('/cardapio')}>
           <FontAwesomeIcon icon={faConciergeBell} size="2x" color="#A3A2A2" width={32} height={32} />
@@ -50,11 +77,14 @@ const Header: React.FC = () => {
         </HeaderContentTable>
 
         <HeaderContentInfor>
-          <HeaderContentInforOrder onClick={() => handleNavigation('/cart')}>
-            {cartItemCount ? <OrderCount>{cartItemCount}</OrderCount> : null}
-            <FontAwesomeIcon icon={faCartPlus} size="2x" color="#A3A2A2" width={32} height={32} />
-            <Text>Pedido</Text>
-          </HeaderContentInforOrder>
+          {!isContaSolicitada && (
+
+            <HeaderContentInforOrder onClick={() => handleNavigation('/cart')}>
+              {cartItemCount ? <OrderCount>{cartItemCount}</OrderCount> : null}
+              <FontAwesomeIcon icon={faCartPlus} size="2x" color="#A3A2A2" width={32} height={32} />
+              <Text>Pedido</Text>
+            </HeaderContentInforOrder>
+          )}
 
           <HeaderContentTotal onClick={() => handleNavigation('/myaccount')}>
             <FontAwesomeIcon icon={faHandHoldingUsd} size="2x" color="#A3A2A2" width={32} height={32} />
@@ -62,7 +92,7 @@ const Header: React.FC = () => {
           </HeaderContentTotal>
         </HeaderContentInfor>
       </HeaderContent>
-    </HeaderContainer>
+    </ContainerToUse>
   );
 };
 

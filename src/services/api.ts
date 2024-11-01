@@ -1,4 +1,8 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosHeaders } from "axios";
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosHeaders,
+} from "axios";
 import StorageService from "../utils/StorageService";
 
 const getConfigData = async () => {
@@ -13,7 +17,7 @@ const getConfigData = async () => {
         baseURL: `http://${ipUrl}:${porta}/v2`,
         headers: {
           "Content-Type": "application/json",
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           empId: idEmpresa,
         },
       };
@@ -34,21 +38,25 @@ const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {  
+  async (config: InternalAxiosRequestConfig) => {
     try {
       const configData = await getConfigData();
       if (configData) {
         config.baseURL = configData.baseURL;
-        
-        // Convertendo o objeto de headers para AxiosHeaders
         if (config.headers instanceof AxiosHeaders) {
-          config.headers.set('Content-Type', configData.headers['Content-Type']);
-          config.headers.set('Authorization', configData.headers['Authorization']);
-          config.headers.set('empId', configData.headers['empId']);
+          config.headers.set(
+            "Content-Type",
+            configData.headers["Content-Type"]
+          );
+          config.headers.set(
+            "Authorization",
+            configData.headers["Authorization"]
+          );
+          config.headers.set("empId", configData.headers["empId"]);
         }
       }
     } catch (error) {
-      //showToast("Erro ao definir configurações de requisição!", 'error');
+      console.error("Erro ao definir configurações de requisição:", error);
     }
     return config;
   },

@@ -1,17 +1,15 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { useRouter } from 'next/router';
-import { getItemsMesa } from "../services/contaService";
 import { getCartItemCount } from '../utils/cartUtils';
-import { Conta } from '../@types/Conta';
 import StorageService from '../utils/StorageService';
-import { Venda } from '@/@types/Venda';
+import { Venda, VendaItem } from '@/@types/Venda';
 import { getSale } from '@/services/vendaService';
 import axios from 'axios';
-import { getEmpresa } from '@/services/empresaService';
+import { getEmpresaPublica } from '@/services/empresaService';
+import { decryptBase64 } from '@/utils/hash';
 
 interface ICartProviderProps {
     children: ReactNode;
-}
+};
 
 interface CartItem {
     id: number;
@@ -20,14 +18,14 @@ interface CartItem {
     valorLiquido: number;
     desconto: number;
     vlrOutrasDesp: number;
-}
+};
 
 type ProductCardProps = {
     proID: number;
     foto: string;
     descricao: string;
     priceFinal: number;
-    priceDiscount?: number;
+    priceDiscount: number;
 };
 
 interface ICartContextData {
@@ -40,21 +38,15 @@ interface ICartContextData {
     cartItemCount: number;
     setCartItemCount: React.Dispatch<React.SetStateAction<number>>;
     calcularTotais: () => void;
-    numeroMesa: number | null;
-    setNumeroMesa: React.Dispatch<React.SetStateAction<number | null>>;
-    fetchNumeroMesa: () => void;
     fetchItems: () => void;
     fetchConfigurations: () => void;
-    fetchCartItems: (numeroMesa: number) => void;
     numMesa: number;
     setNumMesa: React.Dispatch<React.SetStateAction<number>>;
     fetchCartItemCount: () => void;
-    fetchNumMesa: () => void;
     empId: string;
     setEmpId: React.Dispatch<React.SetStateAction<string>>;
     atendente: number;
     setAtendente: React.Dispatch<React.SetStateAction<number>>;
-    fetchUserData: () => void;
     antecipacao: number;
     setAntecipacao: React.Dispatch<React.SetStateAction<number>>;
     taxaServico: number;
@@ -64,19 +56,24 @@ interface ICartContextData {
     temContaMaxDigital: boolean;
     setTemContaMaxDigital: React.Dispatch<React.SetStateAction<boolean>>;
     isModalOpen: boolean;
-    setIsModalOpen: (value: boolean) => void;
+    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
     selectedProduct: ProductCardProps | null;
     setSelectedProduct: (product: ProductCardProps | null) => void;
     vendaId: number;
     setVendaId: React.Dispatch<React.SetStateAction<number>>;
     venda: Venda[];
     setVenda: React.Dispatch<React.SetStateAction<Venda[]>>;
+    isConfigurationsLoaded: boolean;
+    setIsConfigurationsLoaded: React.Dispatch<React.SetStateAction<boolean>>;
+    isContaSolicitada: boolean;
+    setIsContaSolicitada: React.Dispatch<React.SetStateAction<boolean>>;
+    nomeCliente: string;
+    setNomeCliente: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const CartContext = createContext<ICartContextData>({} as ICartContextData);
 
 export const CartProvider = ({ children }: ICartProviderProps) => {
-    const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [totalPedido, setTotalPedido] = useState(0);
     const [totalServico, setTotalServico] = useState(0);
@@ -84,7 +81,6 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     const [totalFinal, setTotalFinal] = useState(0);
     const [desconto, setDesconto] = useState(0);
     const [cartItemCount, setCartItemCount] = useState(0);
-    const [numeroMesa, setNumeroMesa] = useState<number | null>(null);
     const [numMesa, setNumMesa] = useState<number>(0);
     const [empId, setEmpId] = useState('');
     const [atendente, setAtendente] = useState(0);
@@ -94,148 +90,125 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
     const [selectedProduct, setSelectedProduct] = useState<ProductCardProps | null>(null);
     const [vendaId, setVendaId] = useState<number>(0);
     const [venda, setVenda] = useState<Venda[]>([]);
-
-    const { id } = router.query;
+    const [isConfigurationsLoaded, setIsConfigurationsLoaded] = useState(false);
+    const [isContaSolicitada, setIsContaSolicitada] = useState(false);
+    const [nomeCliente, setNomeCliente] = useState("");
 
     function calcularTotais() {
         let pedido = 0;
-        let desconto = 0;
+        let descont = 0;
         let final = 0;
         let servico = 0;
 
         cartItems.forEach((item) => {
-            pedido += item.valorTotal;
-            final += item.valorLiquido;
-            desconto += item.desconto;
+            pedido += item.valorTotal + item.desconto;
+            final += item.valorTotal;
+            descont += item.desconto;
             servico += item.vlrOutrasDesp;
         });
 
         setTotalPedido(pedido);
         setTotalFinal(final);
-        setDesconto(desconto);
+        setDesconto(descont);
         setTotalServico(servico);
-    }
-
-    async function fetchNumeroMesa() {
-        try {
-            const mesa = await StorageService.getItem("numMesa");
-            if (mesa !== null) {
-                setNumeroMesa(parseInt(mesa));
-            }
-        } catch (error) {
-            console.error("Erro ao buscar número da mesa", error);
-        }
     };
 
     const fetchItems = async () => {
-        const vedId = await StorageService.getItem("vendaId");
-        const numero = await StorageService.getItem("numMesa");
+        try {
+            const numero = await StorageService.getItem("numMesa");
 
-        if (numero) {
-            const vendaData = await getSale(vedId ? parseInt(vedId) : undefined, parseInt(numero));
-
-            if (vendaData && vendaData.length > 0) {
-                setVenda(vendaData);
-            } else {
+            if (!numero) {
                 setVenda([]);
-            }
+                setCartItems([]);
+                return;
+            };
+
+            const vendaData = await getSale(parseInt(numero));
+            const idVenda = vendaData?.[0]?.id ?? 0;
+            const solicitouConta = vendaData?.[0]?.solicitar_conta ?? false;
+
+            setVendaId(idVenda);
+            setIsContaSolicitada(solicitouConta);
+            setVenda(vendaData && vendaData.length > 0 ? vendaData : []);
+
+            const items: CartItem[] = vendaData?.[0]?.itens?.map((item: VendaItem) => ({
+                id: item.id ?? 0,
+                productId: item.codProduto,
+                valorTotal: item.valorTotal,
+                valorLiquido: item.valor - (item.desconto || 0),
+                desconto: item.desconto || 0,
+                vlrOutrasDesp: 0,
+            })) || [];
+
+            setCartItems(items);
+
+        } catch (error) {
+            setVenda([]);
+            setCartItems([]);
         }
     };
-
-    async function fetchCartItems(numeroMesa: number) {
-        try {
-            const items: Conta[] = await getItemsMesa(numeroMesa);
-
-            // Mapear os itens de Conta para CartItem, adicionando a propriedade `id`
-            const cartItems: CartItem[] = items.map((item, index) => ({
-                id: index, // ou qualquer lógica para gerar um ID
-                productId: item.productId,
-                valorTotal: item.valorTotal,
-                valorLiquido: item.valorLiquido,
-                desconto: item.desconto,
-                vlrOutrasDesp: item.vlrOutrasDesp,
-            }));
-
-            setCartItems(cartItems.length === 0 ? [] : cartItems);
-        } catch (error) {
-            console.error("Erro ao buscar itens da mesa", error);
-        }
-    }
 
     const fetchCartItemCount = async () => {
         const itemCount = await getCartItemCount();
         setCartItemCount(itemCount);
-    };   
-
-    const fetchNumMesa = async () => {
-        try {
-            const mesa = await StorageService.getItem("numMesa");
-            if (mesa) {
-                setNumMesa(parseInt(mesa));
-            }
-        } catch (error) {
-            console.error("Erro ao buscar número da mesa", error);
-        }
-    };
-
-    const fetchUserData = async () => {
-        try {
-            const empId = await StorageService.getItem("empId");
-            const operador = await StorageService.getItem("atendente");
-
-            setEmpId(empId || "1");
-            setAtendente(parseInt(operador || "0"));
-        } catch (error) {
-            console.error("Erro ao buscar dados do usuário", error);
-        }
     };
 
     const fetchConfigurations = async () => {
         try {
-            // Obtém os dados da empresa da API
-            const empresas = await getEmpresa();
-    
-            // Supondo que a primeira empresa seja a desejada
+            const urlParams = new URL(window.location.href);
+            const pathSegments = urlParams.pathname.split('/');
+            const encryptedMesa = pathSegments[pathSegments.length - 1].replace('m', '');
+
+            const encryptedIpUrl = urlParams.searchParams.get("ig") || "";
+            const encryptedPorta = urlParams.searchParams.get("u") || "";
+
+            const mesa = decryptBase64(encryptedMesa, 3) || encryptedMesa;
+            const ipUrl = decryptBase64(encryptedIpUrl, 13) || encryptedIpUrl;
+            const porta = decryptBase64(encryptedPorta, 4) || encryptedPorta;
+
+            const mesalocal = await StorageService.getItem("numMesa");
+
+            if (mesa !== mesalocal) {
+                await StorageService.removeItem("numMesa");
+                await StorageService.removeItem("ipUrl");
+                await StorageService.removeItem("porta");
+                await StorageService.removeItem("token");
+                await StorageService.removeItem("idEmpresa");
+                await StorageService.removeItem("idVendedor");
+                await StorageService.removeItem("vendaId");
+            };
+
+            await StorageService.setItem("numMesa", mesa);
+            await StorageService.setItem("ipUrl", ipUrl);
+            await StorageService.setItem("porta", porta);
+
+            const apiBaseUrl = `${ipUrl}:${porta}`;
+
+            const empresas = await getEmpresaPublica(apiBaseUrl);
+
             if (empresas.length > 0) {
                 const empresa = empresas[0];
-    
-                // Armazenando as configurações obtidas da API
-                await StorageService.setItem("ipUrl", empresa.IpUrl);
-                await StorageService.setItem("porta", empresa.Porta);
+
                 await StorageService.setItem("idEmpresa", empresa.EmpID.toString());
                 await StorageService.setItem("idVendedor", empresa.UserPadrao);
-    
-                // Verificação se `id` está indefinido
-                if (typeof id === 'undefined') {
-                    await StorageService.removeItem("numMesa");
-                    setNumMesa(0);
-                } else {
-                    const value = await StorageService.getItem("numMesa");
-                    if (value !== numMesa.toString()) {
-                        await StorageService.removeItem("vendaId");
-                        await StorageService.setItem("numMesa", numMesa.toString());
-                        console.log('value:', value, 'numMesa:', numMesa.toString());
-                        setNumMesa(numMesa);
-                    }
-                }
-    
                 setAtendente(parseInt(empresa.UserPadrao));
                 setEmpId(empresa.EmpID.toString());
-    
-                // Fazendo requisição de autenticação com os dados da empresa
+                setNumMesa(parseInt(mesa));
+
                 try {
-                    const response = await axios.get(`http://${empresa.IpUrl}:${empresa.Porta}/v2/auth`);
+                    const response = await axios.get(`http://${apiBaseUrl}/v2/auth`);
                     await StorageService.setItem("token", response.data.token);
                 } catch (error) {
                     console.error("Erro ao autenticar", error);
-                }
+                };
             } else {
                 console.error("Nenhuma empresa encontrada.");
-            }
+            };
+            setIsConfigurationsLoaded(true);
         } catch (error) {
             console.error("Erro ao buscar configurações da empresa:", error);
-        }
-    };  
+        };
+    };
 
     return (
         <CartContext.Provider
@@ -249,19 +222,13 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 totalFinal,
                 cartItemCount,
                 setCartItemCount,
-                numeroMesa,
-                setNumeroMesa,
-                fetchNumeroMesa,
-                fetchCartItems,
                 numMesa,
                 setNumMesa,
                 fetchCartItemCount,
-                fetchNumMesa,
                 empId,
                 setEmpId,
                 atendente,
                 setAtendente,
-                fetchUserData,
                 antecipacao,
                 setAntecipacao,
                 temContaMaxDigital,
@@ -279,7 +246,13 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 venda,
                 setVenda,
                 fetchItems,
-                fetchConfigurations
+                fetchConfigurations,
+                isConfigurationsLoaded,
+                setIsConfigurationsLoaded,
+                isContaSolicitada,
+                setIsContaSolicitada,
+                nomeCliente,
+                setNomeCliente
             }}
         >
             {children}

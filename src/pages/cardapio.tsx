@@ -1,4 +1,3 @@
-// src/pages/cardapio/cardapio.tsx
 import React, { useEffect, useContext } from 'react';
 import Head from 'next/head';
 import Home from '@/components/Home/Home';
@@ -8,7 +7,6 @@ const CardapioPage: React.FC = () => {
   const { setNumMesa } = useContext(CartContext);
 
   useEffect(() => {
-    // Definir numMesa como 0 quando o parâmetro id não está presente
     setNumMesa(0);
   }, []);
 

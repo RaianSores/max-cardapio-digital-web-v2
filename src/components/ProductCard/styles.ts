@@ -11,6 +11,18 @@ export const ProductCardContainer = styled.div`
   gap: 2%;
   max-width: 100%;
   margin-bottom: 0.4rem;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #a19f9f;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #a19f9f;
+  }
 `;
 
 export const ProductCardInfo = styled.div`

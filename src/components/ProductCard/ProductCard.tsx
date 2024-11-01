@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import Image from 'next/image';
 import {
   ProductCardContainer,
@@ -20,7 +20,7 @@ type ProductCardProps = {
   foto: string;
   descricao: string;
   priceFinal: number;
-  priceDiscount?: number;
+  priceDiscount: number;
 };
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -30,7 +30,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   priceFinal,
   priceDiscount,
 }) => {
-  const { isModalOpen, setIsModalOpen, setSelectedProduct, selectedProduct } = useContext(CartContext);
+  const {   
+    selectedProduct, 
+    isContaSolicitada, 
+    setSelectedProduct, 
+    isModalOpen, setIsModalOpen
+  } = useContext(CartContext);
   const temPromocao = priceDiscount && priceDiscount < priceFinal;
 
   const toggleModal = () => {
@@ -55,9 +60,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           }
           alt={descricao}
           width={75}
-          height={75}
-          objectFit="cover"
-          style={{ borderRadius: "9px" }}
+          height={75} 
+          style={{ 
+            objectFit: "cover",
+            borderRadius: "9px" 
+          }}
         />
         <ProductCardInfo>
           <ProductCardTitle>{descricao}</ProductCardTitle>
@@ -76,7 +83,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </ProductCardInfo>
       </ProductCardContainer>
 
-      {isModalOpen && selectedProduct && (
+      {isModalOpen && selectedProduct && !isContaSolicitada && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <ProductSection
             proID={selectedProduct.proID}

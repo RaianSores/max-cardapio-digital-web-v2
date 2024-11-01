@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faBroom, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Header from '../Header/Header';
 import {
     ActionCard,
@@ -11,6 +11,7 @@ import {
     ActionsCardHeader,
     ActionsCardTitle,
     Container,
+    ContainerConta,
     DescriptionCard,
     PriceCard,
     QuantityCard,
@@ -28,11 +29,13 @@ import { formatPrice } from '@/utils/format';
 import { Venda, VendaItem } from '@/@types/Venda';
 import { CartContext } from '@/context/CartContext';
 import { sendSale } from '@/services/vendaService';
+import { encryptBase64Mesa, encryptBase64Porta, encryptBase64Url } from '@/utils/hash';
 
 type CartItem = {
     id: number;
     quantity: number;
     price: number;
+    discount: number;
     description: string;
     image?: string;
 };
@@ -40,9 +43,16 @@ type CartItem = {
 const Cart: React.FC = () => {
     const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const { atendente, empId, numMesa, fetchCartItemCount } = useContext(CartContext);
-
-    const { id } = router.query;
+    const {
+        atendente,
+        nomeCliente,
+        empId,
+        numMesa,
+        isContaSolicitada,
+        fetchCartItemCount,
+        setVendaId,
+        setNomeCliente,
+    } = useContext(CartContext);
 
     useEffect(() => {
         fetchCartItems();
@@ -51,22 +61,41 @@ const Cart: React.FC = () => {
     const fetchCartItems = async () => {
         try {
             const items = await StorageService.getItem("cartItems");
-            if (items) {
-                setCartItems(JSON.parse(items));
-            } else {
-                setCartItems([]);
-            }
+            setCartItems(items ? JSON.parse(items) : []);
         } catch (error) {
             console.error(error);
-        }
+        };
     };
 
-    const handleNavigation = (route: string) => {
-        if (id) {
-            router.push(`${route}/${id}`);
-        } else {
-            router.push(route);
-        }
+    const handleNavigation = async (route: string) => {
+        const mesa = await StorageService.getItem("numMesa") || "";
+        const ipUrl = await StorageService.getItem("ipUrl") || "";
+        const porta = await StorageService.getItem("porta") || "";
+
+        if (!mesa || !ipUrl || !porta) {
+            console.error("Valores insuficientes para construir a URL.");
+            return;
+        };
+
+        try {
+            const mesaEncrypted = encryptBase64Mesa(mesa);
+            const portaEncrypted = encryptBase64Porta(porta);
+            const urlEncrypted = encryptBase64Url(ipUrl);
+
+            const urlPath = `${route}/m${mesaEncrypted}`;
+            const urlQuery = `?ig=${urlEncrypted}&u=${portaEncrypted}&p=${portaEncrypted}`;
+            const fullUrl = `${urlPath}${urlQuery}`;
+
+            router.push(
+                {
+                    pathname: route,
+                    query: { m: mesaEncrypted, ig: urlEncrypted, u: mesaEncrypted, p: portaEncrypted }
+                },
+                fullUrl
+            );
+        } catch (error) {
+            console.error("Erro ao construir a URL de navegação:", error);
+        };
     };
 
     const removeCartItem = async (itemId: number) => {
@@ -79,6 +108,7 @@ const Cart: React.FC = () => {
     const clearCart = async () => {
         await StorageService.removeItem("cartItems");
         await fetchCartItems();
+        setNomeCliente("");
         handleNavigation('/cardapio');
     };
 
@@ -87,41 +117,34 @@ const Cart: React.FC = () => {
             const data = await sendSale(dataSale);
             if (data.id) {
                 await StorageService.setItem("vendaId", (data.id).toString());
+                setVendaId(data.id)
             } else {
                 await StorageService.removeItem("vendaId");
             }
         } catch (error) {
 
-        }
+        };
     };
 
     async function handleSalesItem() {
         const jsonCartItems = await StorageService.getItem("cartItems");
-        const cart = jsonCartItems != null ? JSON.parse(jsonCartItems) : { itens: [] }
+        const cart = jsonCartItems ? JSON.parse(jsonCartItems) : { itens: [] };
+        const vlrTotalLiqProd = cart.itens?.reduce((total: number, item: CartItem) => total + item.price * item.quantity, 0) || 0;
 
-        // Verificar se o cart.itens existe e se tem pelo menos um item
-        const vlrTotalLiqProd =
-            cart.itens && cart.itens.length > 0
-                ? cart.itens.reduce((total: number, item: any) => total + item.valorTotal, 0)
-                : 0;
-
-        const itensSales: VendaItem[] = cart.map((product: any) => {
-            const item: any = {
-                vendaId: 0,
-                codProduto: product.id,
-                cfop: 5102,
-                qtde: product.quantity,
-                valor: product.price,
-                descricaoProd: product.description,
-                valorTotal: product.price * product.quantity,
-                status: "A",
-                data: new Date().toISOString(),
-                un: "UN",
-                desconto: product.desconto || 0,
-            }
-
-            return item;
-        });
+        const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
+            vendaId: 0,
+            codProduto: product.id,
+            cfop: 5102,
+            qtde: product.quantity,
+            valor: product.price,
+            descricaoProd: product.description,
+            valorTotal: product.price * product.quantity,
+            status: "A",
+            data: new Date().toISOString(),
+            un: "UN",
+            desconto: product.discount,
+            vlrOutrasDesp: 0,
+        }));
 
         const orderJson: Venda = {
             numMesa: numMesa,
@@ -134,21 +157,24 @@ const Cart: React.FC = () => {
             tipoOrigin: "tpMesa",
             abertura: "A",
             cfop: 5102,
-            cliNome: "CONSUMIDOR",
+            cliNome: nomeCliente || "CONSUMIDOR",
             cpf: "",
             totalNf: vlrTotalLiqProd,
             msg: "",
-            vlrTotalLiqProd: vlrTotalLiqProd,
+            vlrTotalLiqProd,
             consumidorFinal: true,
             empId: empId || '1',
             itens: itensSales,
         };
+        console.log('Cart',JSON.stringify(orderJson, undefined, 2));
         await sendDataSale(orderJson);
         await clearCart();
-    }
+    };
+
+    const ContainerToUse = isContaSolicitada ? ContainerConta : Container;
 
     return (
-        <Container>
+        <ContainerToUse>
             <Header />
             <ActionsCardHeader>
                 <ActionsCardBack onClick={() => router.back()}>Voltar</ActionsCardBack>
@@ -164,22 +190,30 @@ const Cart: React.FC = () => {
                 <ActionCardContent>
                     {cartItems.map((item, index) => (
                         <>
-                            <ActionCardInvoiceTableRow key={index}>
+                            <ActionCardInvoiceTableRow key={item.id || index}>
                                 <DescriptionCard>{item.description}</DescriptionCard>
                                 <PriceCard>{formatPrice(item.price)}</PriceCard>
                                 <QuantityCard>{item.quantity}</QuantityCard>
                                 <TotalPriceCard>{formatPrice(item.price * item.quantity)}</TotalPriceCard>
-                            <FontAwesomeIcon icon={faTrash} size="2x" color="#4d4b4b" width={20} height={20} onClick={() => removeCartItem(item.id)} />
+                                <FontAwesomeIcon icon={faTrash} size="2x" color="#4d4b4b" width={20} height={20} onClick={() => removeCartItem(item.id)} />
                             </ActionCardInvoiceTableRow>
                         </>
                     ))}
                 </ActionCardContent>
-                <ActionCardInvoiceFooter>
-                    <ClearButton onClick={clearCart}>Limpar Carrinho</ClearButton>
-                    <ConfirmButton onClick={handleSalesItem}>Enviar Pedido</ConfirmButton>
-                </ActionCardInvoiceFooter>
+                {!isContaSolicitada ? (<>
+                    <ActionCardInvoiceFooter>
+                        <ClearButton onClick={clearCart}>
+                        <FontAwesomeIcon icon={faBroom} size="1x" color="#FFFF" width={32} height={32} />
+                            Limpar Carrinho
+                        </ClearButton>
+                        <ConfirmButton onClick={handleSalesItem}>
+                        <FontAwesomeIcon icon={faPaperPlane} size="1x" color="#FFFF" width={32} height={32} />
+                            Enviar Pedido
+                        </ConfirmButton>
+                    </ActionCardInvoiceFooter>
+                </>) : (<></>)}
             </ActionCard>
-        </Container>
+        </ContainerToUse>
     );
 };
 

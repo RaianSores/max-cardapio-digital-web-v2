@@ -1,31 +1,51 @@
 import React, { useState, useContext, useEffect } from "react";
-import axios from "axios";
 import Header from "../../components/Header/Header";
 import Menu from "../Menu/Menu";
 import { CartContext } from "@/context/CartContext";
-import { Container, Content } from "./styles";
+import { Container, ContainerConta, Content } from "./styles";
+import Modal from "../Modal/Modal";
+import InputClient from "../InputClient/InputClient";
 
 const Home: React.FC = () => {
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
-  const { numMesa, fetchConfigurations } = useContext(CartContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    isContaSolicitada,
+    vendaId,
+    nomeCliente,
+    fetchConfigurations,
+    fetchItems,
+  } = useContext(CartContext);
 
   useEffect(() => {
-    if (numMesa) {
-      fetchConfigurations();
-    }
-  }, [numMesa]);
+    fetchConfigurations();
+  }, [fetchConfigurations]);
+
+  useEffect(() => {
+    fetchItems();
+     if (vendaId === 0 && !isContaSolicitada) {
+      setIsModalOpen(true);
+    } 
+  }, [vendaId, isContaSolicitada]);   
 
   const handleGrupoSelect = (groupId: number) => {
     setActiveGroupId(groupId === activeGroupId ? null : groupId);
   };
 
+  const ContainerToUse = isContaSolicitada ? ContainerConta : Container;
+
   return (
-    <Container>
+    <ContainerToUse>
       <Header />
       <Content>
         <Menu onGrupoSelect={handleGrupoSelect} activeGroupId={activeGroupId} />
       </Content>
-    </Container>
+      {isModalOpen && !nomeCliente && !isContaSolicitada && (
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <InputClient />
+        </Modal>
+      )} 
+    </ContainerToUse>
   );
 };
 

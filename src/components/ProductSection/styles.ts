@@ -41,12 +41,23 @@ export const DecreaseButton = styled.button`
   width: 60px;
   height: 60px;
   justify-content: center;
-  background-color: #4E4D4B;
+  background-color: #4e4d4b;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   border: none;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #41403f;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #41403f;
+  }
 `;
 
 export const IncreaseButton = styled.button`
@@ -54,24 +65,46 @@ export const IncreaseButton = styled.button`
   width: 60px;
   height: 60px;
   justify-content: center;
-  background-color: #4E4D4B;
+  background-color: #4e4d4b;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   border: none;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #41403f;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #41403f;
+  }
 `;
 
 export const ConfirmButton = styled.button`
-  background-color: #F38321;
+  background-color: #f38321;
   border: none;
   border-radius: 10px;
   width: 80px;
   height: 60px;
   font-size: 20px;
   margin-left: 10px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #d4711c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #d4711c;
+  }
 `;
 
 export const PriceContainer = styled.div`

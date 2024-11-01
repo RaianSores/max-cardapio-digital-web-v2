@@ -1,7 +1,7 @@
 export interface Venda {
   numMesa: number;
   operador: number;
-  pediuConta?: number;
+  solicitar_conta?: boolean;
   id?: number;
   clienteId: number;
   tipo: string;
@@ -21,14 +21,16 @@ export interface Venda {
 }
 
 export interface VendaItem {
+  id?: number;
   vendaId: number;
   codProduto: number;
   cfop: number;
   qtde: number;
   valor: number;
-  desconto: number | null;
+  desconto: number;
   descricaoProd: string;
   valorTotal: number;
+  vlrOutrasDesp: number;
   status: string;
   un: string;
 }

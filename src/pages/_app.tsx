@@ -7,7 +7,7 @@ function RavenGestor({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Max-Food | Sistemas</title>
+        <title>Max-Food | MaxData</title>
         <meta name="description" content="Max-Food" />
       </Head>
       <CartProvider>

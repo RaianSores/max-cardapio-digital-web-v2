@@ -1,5 +1,5 @@
 import api from "./api";
-import { IRequestAccount, Venda } from "../@types/Venda";
+import { Venda } from "../@types/Venda";
 
 export const sendSale = async (venda: Venda): Promise<Venda> => {
   try {
@@ -14,12 +14,11 @@ export const sendSale = async (venda: Venda): Promise<Venda> => {
   }
 };
 
-export const getSale = async (id: number | undefined, numMesa: number): Promise<Venda[]> => {
+export const getSale = async (numMesa: number): Promise<Venda[]> => {
   try {
     const response = await api.get(`/venda`, {
-      params: { id, numMesa },
+      params: { numMesa },
     });
-
     if (response.status === 200) {
       return response.data.docs as Venda[];
     } else {
@@ -30,16 +29,18 @@ export const getSale = async (id: number | undefined, numMesa: number): Promise<
   }
 };
 
-
-export const solicitarConta = async (
-  venda: IRequestAccount
-): Promise<IRequestAccount> => {
+export const solicitarConta = async (id: number, requestAccount: boolean): Promise<{ mensagem: string }> => {
   try {
-    const response = await api.post("/food/venda/solicitaConta", venda);
+    const response = await api.put(`/venda/solicitaconta/${id}/solicitaconta`, null, {
+      params: {
+        solicitaconta: requestAccount
+      },
+    });
+
     if (response.status === 200) {
-      return response.data as IRequestAccount;
+      return response.data;
     } else {
-      throw new Error(response.data.message);
+      throw new Error("Erro ao solicitar conta.");
     }
   } catch (error) {
     throw error;

@@ -7,6 +7,13 @@ export const Container = styled.div`
   background-color: #3e3e3e;
 `;
 
+export const ContainerConta = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #740c0c;
+`;
+
 export const ActionCardContent = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -39,15 +46,26 @@ export const ActionsCardBack = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 3px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #d4711c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #c56118;
+  }
 `;
 
 export const ActionCard = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; 
+  justify-content: space-between;
   background-color: #ddd;
   margin: 8px;
   border-radius: 5px;
@@ -144,8 +162,19 @@ export const ConfirmButton = styled.button`
   background-color: #f38321;
   border: none;
   border-radius: 5px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #d4711c;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #c56118;
+  }
 `;
 
 export const ClearButton = styled.button`
@@ -156,6 +185,17 @@ export const ClearButton = styled.button`
   background-color: #03a371;
   border: none;
   border-radius: 5px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    background-color: #04885e;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    background-color: #04885e;
+  }
 `;

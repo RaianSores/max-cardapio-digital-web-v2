@@ -1,18 +1,22 @@
 import styled from "styled-components";
 
-interface ProductListContainerProps {
-  pedidoConta: boolean;
-}
-
-export const ProductListContainer = styled.div<ProductListContainerProps>`
+export const ProductListContainer = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: ${(props) => (props.pedidoConta ? "#740c0c" : "#3E3E3E")};
+  background-color: #3E3E3E;
   width: 100%;
   box-sizing: border-box;
 `;
 
-export const ProductListContent = styled.div<ProductListContainerProps>`
+export const ProductListContainerConta = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #740c0c;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+export const ProductListContent = styled.div`
   display: flex;
   flex-direction: column;
   flex-grow: 1;

@@ -8,6 +8,14 @@ export const HeaderContainer = styled.div`
   padding: 5px;
 `;
 
+export const HeaderContainerConta = styled.div`
+  display: flex;
+  flex-direction: row;
+  background-color: #740c0c;
+  align-items: center;
+  padding: 5px;
+`;
+
 export const HeaderContent = styled.div`
   flex: 1;
   display: flex;
