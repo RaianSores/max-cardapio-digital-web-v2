@@ -28,7 +28,7 @@ export const InputQtde = styled.div`
 export const QuantityInput = styled.input`
   text-align: center;
   color: black;
-  background-color: #ddd;
+  background-color: #FFF;
   border: none;
   width: 55px;
   height: 60px;

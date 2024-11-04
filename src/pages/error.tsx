@@ -1,16 +1,18 @@
 import React from 'react';
-import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Error from '@/components/Error/Error';
 
 const ErrorPage: React.FC = () => {
-  const router = useRouter();
-
   return (
-    <div>
-      <h1>Erro: Mesa não encontrada!</h1>
-      <p>O número da mesa ou o link que você acessou é inválido.</p>
-      <button onClick={() => router.push('/')}>Voltar à Home</button>
-    </div>
-  );
+    <>
+        <Head>
+            <title>Max-Food | Carrinho</title>
+            <meta name="description" content="Max-Food" />
+            <link rel="icon" href="./favicon.ico" />
+        </Head>
+        <Error />
+    </>
+);
 };
 
 export default ErrorPage;

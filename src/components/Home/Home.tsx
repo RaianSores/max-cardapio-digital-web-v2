@@ -9,12 +9,11 @@ import InputClient from "../InputClient/InputClient";
 const Home: React.FC = () => {
   const [activeGroupId, setActiveGroupId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const {
-    isContaSolicitada,
-    vendaId,
-    nomeCliente,
-    fetchConfigurations,
-    fetchItems,
+  const { 
+    isContaSolicitada, 
+    nomeCliente, 
+    fetchConfigurations, 
+    fetchItems, 
   } = useContext(CartContext);
 
   useEffect(() => {
@@ -23,10 +22,10 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     fetchItems();
-     if (vendaId === 0 && !isContaSolicitada) {
+    if (nomeCliente) {
       setIsModalOpen(true);
-    } 
-  }, [vendaId, isContaSolicitada]);   
+    }
+  }, [nomeCliente]);
 
   const handleGrupoSelect = (groupId: number) => {
     setActiveGroupId(groupId === activeGroupId ? null : groupId);
@@ -42,9 +41,9 @@ const Home: React.FC = () => {
       </Content>
       {isModalOpen && !nomeCliente && !isContaSolicitada && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <InputClient />
+          <InputClient closeModal={() => setIsModalOpen(false)} />
         </Modal>
-      )} 
+      )}
     </ContainerToUse>
   );
 };

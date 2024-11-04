@@ -38,7 +38,7 @@ export const ActionsCardTitle = styled.h1`
 `;
 
 export const ActionsCardBack = styled.button`
-  font-size: 18px;
+  font-size: 100%;
   font-weight: bold;
   height: 30px;
   width: 20%;
@@ -66,7 +66,7 @@ export const ActionCard = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #ddd;
+  background-color: #dddddd;
   margin: 8px;
   border-radius: 5px;
   position: relative;
@@ -155,7 +155,7 @@ export const ActionCardInvoiceFooter = styled.div`
 `;
 
 export const ConfirmButton = styled.button`
-  font-size: 18px;
+  font-size: 90%;
   font-weight: bold;
   height: 50px;
   width: 45%;
@@ -178,7 +178,7 @@ export const ConfirmButton = styled.button`
 `;
 
 export const ClearButton = styled.button`
-  font-size: 18px;
+  font-size: 90%;
   font-weight: bold;
   height: 50px;
   width: 45%;
@@ -199,3 +199,46 @@ export const ClearButton = styled.button`
     background-color: #04885e;
   }
 `;
+
+export const ActionCardEmpty = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;  
+  background-color: #dddddd;
+  margin: 10px;
+  border-radius: 5px;
+  position: relative;
+  padding: 20px;
+`;
+
+export const ContainerEmpty = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+`;
+
+export const Title = styled.h1`
+  font-size: 24px;
+  color: #363539;
+  margin-top: 20px;
+`;
+
+/* export const ContainerEmpty = styled.div`
+  flex-direction: row;
+  align-items: center;
+  text-align: center;
+  margin-top: 25%;
+  justify-content: center;
+`;
+
+export const Title = styled.h1`
+  font-size: 24px;
+  color: #363539;
+  margin: 0;
+`; */

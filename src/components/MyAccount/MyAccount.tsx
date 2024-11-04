@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoneyCheckDollar } from "@fortawesome/free-solid-svg-icons";
 import Header from '../Header/Header';
@@ -34,6 +34,7 @@ import StorageService from '@/utils/StorageService';
 
 const MyAccount: React.FC = () => {
     const router = useRouter();
+    const [isInitialized, setIsInitialized] = useState(false);
     const {
         venda,
         totalPedido,
@@ -46,13 +47,12 @@ const MyAccount: React.FC = () => {
     } = useContext(CartContext);
 
     useEffect(() => {
-        init();
-    }, []);
-
-    async function init() {
-        fetchItems();
-        calcularTotais();
-    };
+        if (!isInitialized) {
+            fetchItems();
+            calcularTotais();
+            setIsInitialized(true);
+        }
+    }, [isInitialized, fetchItems, calcularTotais]);
 
     async function handleRequestAccount() {
         const id = await StorageService.getItem("vendaId");
@@ -72,7 +72,6 @@ const MyAccount: React.FC = () => {
                 <ActionsCardTitle>| Minha Conta</ActionsCardTitle>
             </ActionsCardHeader>
             <ActionCard>
-
                 <ActionPrice>
                     <LineItem>
                         <Title>Total Pedido:</Title>
@@ -91,7 +90,6 @@ const MyAccount: React.FC = () => {
                         <Price>{formatPrice(totalFinal)}</Price>
                     </LineItem>
                 </ActionPrice>
-
                 <ActionCardHeaderList>
                     <TableColLeft><RegTable>Descrição</RegTable></TableColLeft>
                     <TableColRigth><RegTable>Vlr Unit.</RegTable></TableColRigth>

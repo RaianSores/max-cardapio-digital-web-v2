@@ -37,7 +37,7 @@ export const ActionsCardTitle = styled.h1`
 `;
 
 export const ActionsCardBack = styled.button`
-  font-size: 18px;
+  font-size: 100%;
   font-weight: bold;
   height: 30px;
   width: 20%;
@@ -153,7 +153,7 @@ export const ActionCardInvoiceFooter = styled.div`
 `;
 
 export const ConfirmButton = styled.button`
-  font-size: 18px;
+  font-size: 100%;
   font-weight: bold;
   height: 50px;
   width: 45%;
@@ -216,14 +216,14 @@ export const ActionPrice = styled.div`
   align-items: flex-start;
   justify-content: space-around;
   background-color: #ddd;
-  padding: 10px;
+  padding: 8px;
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 10;
   border-bottom: 1px solid #ccc;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   border-radius: 5px;
 `;
 
@@ -233,7 +233,7 @@ export const LineItem = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 5px 0;
+  //padding: 1px 0;
 `;
 
 export const Title = styled.p`

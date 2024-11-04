@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import dynamic from 'next/dynamic';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faBroom, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Header from '../Header/Header';
@@ -21,7 +22,10 @@ import {
     TableColRigth,
     ActionCardInvoiceFooter,
     ConfirmButton,
-    ClearButton
+    ClearButton,
+    Title,
+    ContainerEmpty,
+    ActionCardEmpty
 } from './styles';
 import { useRouter } from 'next/router';
 import StorageService from '@/utils/StorageService';
@@ -30,6 +34,8 @@ import { Venda, VendaItem } from '@/@types/Venda';
 import { CartContext } from '@/context/CartContext';
 import { sendSale } from '@/services/vendaService';
 import { encryptBase64Mesa, encryptBase64Porta, encryptBase64Url } from '@/utils/hash';
+
+import emptyCartAnimation from '../../lottie/Animation - 1730744797551.json';
 
 type CartItem = {
     id: number;
@@ -40,6 +46,8 @@ type CartItem = {
     image?: string;
 };
 
+const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+
 const Cart: React.FC = () => {
     const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -49,6 +57,7 @@ const Cart: React.FC = () => {
         empId,
         numMesa,
         isContaSolicitada,
+        cartItemCount,
         fetchCartItemCount,
         setVendaId,
         setNomeCliente,
@@ -64,7 +73,7 @@ const Cart: React.FC = () => {
             setCartItems(items ? JSON.parse(items) : []);
         } catch (error) {
             console.error(error);
-        };
+        }
     };
 
     const handleNavigation = async (route: string) => {
@@ -75,7 +84,7 @@ const Cart: React.FC = () => {
         if (!mesa || !ipUrl || !porta) {
             console.error("Valores insuficientes para construir a URL.");
             return;
-        };
+        }
 
         try {
             const mesaEncrypted = encryptBase64Mesa(mesa);
@@ -95,7 +104,7 @@ const Cart: React.FC = () => {
             );
         } catch (error) {
             console.error("Erro ao construir a URL de navegação:", error);
-        };
+        }
     };
 
     const removeCartItem = async (itemId: number) => {
@@ -117,14 +126,14 @@ const Cart: React.FC = () => {
             const data = await sendSale(dataSale);
             if (data.id) {
                 await StorageService.setItem("vendaId", (data.id).toString());
-                setVendaId(data.id)
+                setVendaId(data.id);
             } else {
                 await StorageService.removeItem("vendaId");
             }
         } catch (error) {
-
-        };
-    };
+            console.error(error);
+        }
+    }
 
     async function handleSalesItem() {
         const jsonCartItems = await StorageService.getItem("cartItems");
@@ -166,10 +175,10 @@ const Cart: React.FC = () => {
             empId: empId || '1',
             itens: itensSales,
         };
-        console.log('Cart',JSON.stringify(orderJson, undefined, 2));
+        console.log('Cart', JSON.stringify(orderJson, undefined, 2));
         await sendDataSale(orderJson);
         await clearCart();
-    };
+    }
 
     const ContainerToUse = isContaSolicitada ? ContainerConta : Container;
 
@@ -180,39 +189,46 @@ const Cart: React.FC = () => {
                 <ActionsCardBack onClick={() => router.back()}>Voltar</ActionsCardBack>
                 <ActionsCardTitle>| Meu Carrinho</ActionsCardTitle>
             </ActionsCardHeader>
-            <ActionCard>
-                <ActionCardHeaderList>
-                    <TableColLeft><RegTable>Descrição</RegTable></TableColLeft>
-                    <TableColRigth><RegTable>Vlr Unit.</RegTable></TableColRigth>
-                    <TableColRigth><RegTable>Qtde</RegTable></TableColRigth>
-                    <TableColRigth><RegTable>Vlr Total</RegTable></TableColRigth>
-                </ActionCardHeaderList>
-                <ActionCardContent>
-                    {cartItems.map((item, index) => (
-                        <>
-                            <ActionCardInvoiceTableRow key={item.id || index}>
+            {cartItems.length === 0 ? (
+                <ActionCardEmpty>
+                    <ContainerEmpty>
+                    <Lottie animationData={emptyCartAnimation} loop={true} />
+                    <Title>Carrinho vazio!</Title>
+                    </ContainerEmpty>
+                </ActionCardEmpty>
+            ) : (
+                <ActionCard>
+                    <ActionCardHeaderList>
+                        <TableColLeft><RegTable>Descrição</RegTable></TableColLeft>
+                        <TableColRigth><RegTable>Vlr Unit.</RegTable></TableColRigth>
+                        <TableColRigth><RegTable>Qtde</RegTable></TableColRigth>
+                        <TableColRigth><RegTable>Vlr Total</RegTable></TableColRigth>
+                    </ActionCardHeaderList>
+                    <ActionCardContent>
+                        {cartItems.map((item) => (
+                            <ActionCardInvoiceTableRow key={item.id}>
                                 <DescriptionCard>{item.description}</DescriptionCard>
                                 <PriceCard>{formatPrice(item.price)}</PriceCard>
                                 <QuantityCard>{item.quantity}</QuantityCard>
                                 <TotalPriceCard>{formatPrice(item.price * item.quantity)}</TotalPriceCard>
                                 <FontAwesomeIcon icon={faTrash} size="2x" color="#4d4b4b" width={20} height={20} onClick={() => removeCartItem(item.id)} />
                             </ActionCardInvoiceTableRow>
-                        </>
-                    ))}
-                </ActionCardContent>
-                {!isContaSolicitada ? (<>
-                    <ActionCardInvoiceFooter>
-                        <ClearButton onClick={clearCart}>
-                        <FontAwesomeIcon icon={faBroom} size="1x" color="#FFFF" width={32} height={32} />
-                            Limpar Carrinho
-                        </ClearButton>
-                        <ConfirmButton onClick={handleSalesItem}>
-                        <FontAwesomeIcon icon={faPaperPlane} size="1x" color="#FFFF" width={32} height={32} />
-                            Enviar Pedido
-                        </ConfirmButton>
-                    </ActionCardInvoiceFooter>
-                </>) : (<></>)}
-            </ActionCard>
+                        ))}
+                    </ActionCardContent>
+                    {!isContaSolicitada && cartItemCount > 0 && (
+                        <ActionCardInvoiceFooter>
+                            <ClearButton onClick={clearCart}>
+                                <FontAwesomeIcon icon={faBroom} size="1x" color="#FFFF" width={32} height={32} />
+                                Limpar Carrinho
+                            </ClearButton>
+                            <ConfirmButton onClick={handleSalesItem}>
+                                <FontAwesomeIcon icon={faPaperPlane} size="1x" color="#FFFF" width={32} height={32} />
+                                Enviar Pedido
+                            </ConfirmButton>
+                        </ActionCardInvoiceFooter>
+                    )}
+                </ActionCard>
+            )}
         </ContainerToUse>
     );
 };

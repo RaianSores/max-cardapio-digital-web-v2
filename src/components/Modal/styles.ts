@@ -15,8 +15,8 @@ export const ModalOverlay = styled.div`
   margin: 0 auto !important;
 `;
 
-export const ModalContainer = styled.div`
-  background-color: white;
+export const ModalContainer = styled.div` 
+  background-color: #ddd;
   padding: 10px;
   border-radius: 10px;
   max-width: 90%;
