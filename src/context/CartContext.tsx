@@ -163,7 +163,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         setCartItemCount(itemCount);
     };
 
-/*     const fetchConfigurations = async () => {
+     const fetchConfigurations = async () => {
         try {
             const urlParams = new URL(window.location.href);
             const pathSegments = urlParams.pathname.split('/');
@@ -218,9 +218,9 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         } catch (error) {
             console.error("Erro ao buscar configurações da empresa:", error);
         };
-    }; */
+    };
 
-    const fetchConfigurations = async () => {
+/*     const fetchConfigurations = async () => {
         try {
             // Recupera a URL completa do localStorage ou da página atual
             const currentUrl = await StorageService.getItem("fullUrl") || window.location.href;
@@ -282,7 +282,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         } catch (error) {
             console.error("Erro ao buscar configurações da empresa:", error);
         }
-    };
+    }; */
     
 
     return (

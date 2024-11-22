@@ -81,6 +81,7 @@ const ProductSection: React.FC<ProductProps> = ({
             const cartItems = existingItems ? JSON.parse(existingItems) : [];
             cartItems.push(newItem);
             await StorageService.setItem("cartItems", JSON.stringify(cartItems));
+            console.log(JSON.stringify(cartItems, undefined, 2))
             setCartItems(cartItems);
             setIsModalOpen(false);
         } catch (error) {
@@ -107,7 +108,11 @@ const ProductSection: React.FC<ProductProps> = ({
                             ? priceDiscount
                             : priceFinal;
 
-                        const priceDiscoun = priceFinal - priceDiscount   
+                        const priceDiscoun = priceFinal - priceDiscount  
+
+                        //const desconto = (price )
+                        
+                         
                         addToCart({
                             id: proID,
                             quantity,

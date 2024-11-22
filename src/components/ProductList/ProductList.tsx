@@ -81,7 +81,7 @@ const ProductList: React.FC<ProductListProps> = ({ selectedGroupId }) => {
           {produtos.map((produto) => (
             <ProductCard
               key={produto.ID}
-              proID={produto.proId}
+              proID={produto.ProID}
               foto={produto.Foto}
               descricao={produto.Descricao}
               priceFinal={produto.PrecoNormal}

@@ -139,6 +139,7 @@ const Cart: React.FC = () => {
         const jsonCartItems = await StorageService.getItem("cartItems");
         const cart = jsonCartItems ? JSON.parse(jsonCartItems) : { itens: [] };
         const vlrTotalLiqProd = cart.itens?.reduce((total: number, item: CartItem) => total + item.price * item.quantity, 0) || 0;
+        const idVendedor = await StorageService.getItem("idVendedor");
 
         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
             vendaId: 0,
@@ -151,8 +152,9 @@ const Cart: React.FC = () => {
             status: "A",
             data: new Date().toISOString(),
             un: "UN",
-            desconto: product.discount,
+            desconto: product.discount, //((precoBruto - precoLiquido) / precoBruto) * 100
             vlrOutrasDesp: 0,
+            operador: idVendedor !== null ? parseInt(idVendedor) : 1, 
         }));
 
         const orderJson: Venda = {
@@ -175,7 +177,6 @@ const Cart: React.FC = () => {
             empId: empId || '1',
             itens: itensSales,
         };
-        console.log('Cart', JSON.stringify(orderJson, undefined, 2));
         await sendDataSale(orderJson);
         await clearCart();
     }

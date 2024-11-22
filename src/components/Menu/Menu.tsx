@@ -49,15 +49,15 @@ const Menu: React.FC<MenuProps> = ({ onGrupoSelect, activeGroupId }) => {
       {activeGroupId === 10001 && <ProductList selectedGroupId={10001} />}
 
       {grupos.map((item) => (
-        <React.Fragment key={item.id}>
-          <MenuItem onClick={() => onGrupoSelect(item.grupo_id)}>
+        <React.Fragment key={item.Id}>
+          <MenuItem onClick={() => onGrupoSelect(item.GdpID)}>
             <Image
               src={
-                item.foto
-                  ? `data:image/png;base64,${item.foto}`
+                item.Foto
+                  ? `data:image/png;base64,${item.Foto}`
                   : defaultImage
               }
-              alt={item.nome}
+              alt={item.Nome}
               width={50}
               height={50}
               style={{ 
@@ -66,9 +66,9 @@ const Menu: React.FC<MenuProps> = ({ onGrupoSelect, activeGroupId }) => {
                 marginRight: "5px"
               }}
             />
-            <MenuText>{item.nome}</MenuText>
+            <MenuText>{item.Nome}</MenuText>
           </MenuItem>
-          {activeGroupId === item.grupo_id && <ProductList selectedGroupId={item.grupo_id} />}
+          {activeGroupId === item.GdpID && <ProductList selectedGroupId={item.GdpID} />}
         </React.Fragment>
       ))}
     </MenuContainer>

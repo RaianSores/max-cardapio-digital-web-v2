@@ -24,6 +24,7 @@ export interface VendaItem {
   id?: number;
   vendaId: number;
   codProduto: number;
+  operador: number;
   cfop: number;
   qtde: number;
   valor: number;
