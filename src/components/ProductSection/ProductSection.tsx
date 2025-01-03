@@ -81,7 +81,6 @@ const ProductSection: React.FC<ProductProps> = ({
             const cartItems = existingItems ? JSON.parse(existingItems) : [];
             cartItems.push(newItem);
             await StorageService.setItem("cartItems", JSON.stringify(cartItems));
-            console.log(JSON.stringify(cartItems, undefined, 2))
             setCartItems(cartItems);
             setIsModalOpen(false);
         } catch (error) {

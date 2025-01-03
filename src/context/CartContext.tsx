@@ -129,6 +129,17 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             };
 
             const vendaData = await getSale(parseInt(numero));
+            const status = vendaData?.[0].status;
+            console.log(JSON.stringify(vendaData, undefined, 2))
+
+            if (status !== "A" && status !== "S") {
+                setVenda([]);
+                setCartItems([]);
+                await StorageService.removeItem("vendaId");
+                await StorageService.removeItem("cartItems");
+                return;
+            }
+            
             const idVenda = vendaData?.[0]?.id ?? 0;
             const solicitouConta = vendaData?.[0]?.solicitar_conta ?? false;
             const cli = vendaData?.[0]?.cliNome;
