@@ -139,9 +139,9 @@ const Cart: React.FC = () => {
         const jsonCartItems = await StorageService.getItem("cartItems");
         const cart = jsonCartItems ? JSON.parse(jsonCartItems) : { itens: [] };
         const vlrTotalLiqProd = cart.itens?.reduce((total: number, item: CartItem) => total + item.price * item.quantity, 0) || 0;
-        const idVendedor = await StorageService.getItem("idVendedor");
-
-        const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
+        const idVendedor = await StorageService.getItem("idVendedor"); 
+        
+/*         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
             vendaId: 0,
             codProduto: product.id,
             cfop: 5102,
@@ -155,7 +155,49 @@ const Cart: React.FC = () => {
             desconto: product.discount, //((precoBruto - precoLiquido) / precoBruto) * 100
             vlrOutrasDesp: 0,
             operador: idVendedor !== null ? parseInt(idVendedor) : 1, 
-        }));
+        })); */
+
+         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => {
+            // Apenas calcular o desconto se existir um valor de promoção válido
+            
+            const precoBruto = product.price * product.quantity;
+            const precoLiquido =  (product.price * product.quantity) - product.discount;
+
+            const desconto = (((precoBruto - precoLiquido) / precoBruto) * 100) / 100
+
+            return {
+                vendaId: 0,
+                codProduto: product.id,
+                cfop: 5102,
+                qtde: product.quantity,
+                valor: product.price,
+                descricaoProd: product.description,
+                valorTotal: precoLiquido - desconto,
+                status: "A",
+                data: new Date().toISOString(),
+                un: "UN",
+                desconto: desconto / 100, // O desconto calculado ou 0
+                vlrOutrasDesp: 0,
+                operador: idVendedor !== null ? parseInt(idVendedor) : 1,
+            };
+        }); 
+        
+
+/*         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
+            vendaId: 0,
+            codProduto: product.id,
+            cfop: 5102,
+            qtde: product.quantity,
+            valor: product.price,
+            descricaoProd: product.description,
+            valorTotal: product.price * product.quantity,
+            status: "A",
+            data: new Date().toISOString(),
+            un: "UN",
+            desconto: product.discount, //((precoBruto - precoLiquido) / precoBruto) * 100
+            vlrOutrasDesp: 0,
+            operador: idVendedor !== null ? parseInt(idVendedor) : 1, 
+        })); */
 
         const orderJson: Venda = {
             numMesa: numMesa,
@@ -179,7 +221,7 @@ const Cart: React.FC = () => {
         };
         await sendDataSale(orderJson);
         await clearCart();
-    }
+    };
 
     const ContainerToUse = isContaSolicitada ? ContainerConta : Container;
 
