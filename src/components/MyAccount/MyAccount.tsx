@@ -42,6 +42,7 @@ const MyAccount: React.FC = () => {
         totalServico,
         totalFinal,
         isContaSolicitada,
+        setIsContaSolicitada,
         fetchItems,
         calcularTotais
     } = useContext(CartContext);
@@ -102,11 +103,26 @@ const MyAccount: React.FC = () => {
                             <React.Fragment key={vendaIndex}>
                                 {singleVenda.itens && singleVenda.itens.length > 0 ? (
                                     singleVenda.itens.map((item, index) => (
-                                        <ActionCardInvoiceTableRow key={index}>
-                                            <DescriptionCard>{item.descricaoProd}</DescriptionCard>
-                                            <PriceCard>{formatPrice(item.valor)}</PriceCard>
-                                            <QuantityCard>{item.qtde}</QuantityCard>
-                                            <TotalPriceCard>{formatPrice(item.valor * item.qtde)}</TotalPriceCard>
+                                        <ActionCardInvoiceTableRow
+                                            key={index}
+                                            style={{
+                                                textDecoration: item.status === "C" ? "line-through" : "none",
+                                                opacity: item.status === "C" ? 0.6 : 1,
+                                            }}
+                                        >
+                                            <DescriptionCard>
+                                                {item.descricaoProd}
+                                                {item.status === "C" && <span> (Cancelado)</span>}
+                                            </DescriptionCard>
+                                            <PriceCard>
+                                                {item.status === "C" ? "-" : formatPrice(item.valor)}
+                                            </PriceCard>
+                                            <QuantityCard>
+                                                {item.status === "C" ? "-" : item.qtde}
+                                            </QuantityCard>
+                                            <TotalPriceCard>
+                                                {item.status === "C" ? "-" : formatPrice(item.valor * item.qtde)}
+                                            </TotalPriceCard>
                                         </ActionCardInvoiceTableRow>
                                     ))
                                 ) : (
@@ -118,7 +134,8 @@ const MyAccount: React.FC = () => {
                         <></>
                     )}
                 </ActionCardContent>
-                {!isContaSolicitada && (
+
+                {!isContaSolicitada && totalPedido !== 0 && (
                     <ActionCardInvoiceFooter>
                         <ConfirmButton onClick={handleRequestAccount}>
                             <FontAwesomeIcon icon={faMoneyCheckDollar} size="1x" color="#FFFF" width={32} height={32} />
