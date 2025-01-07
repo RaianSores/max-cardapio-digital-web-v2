@@ -99,24 +99,29 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         let descont = 0;
         let final = 0;
         let servico = 0;
-    
+
         cartItems.forEach((item) => {
             const itemValorTotal = item.valorTotal || 0;
             const itemDesconto = item.desconto || 0;
             const itemVlrOutrasDesp = item.vlrOutrasDesp || 0;
-    
+
             pedido += itemValorTotal + itemDesconto;
             final += itemValorTotal;
             descont += itemDesconto;
             servico += itemVlrOutrasDesp;
         });
-    
+
         setTotalPedido(pedido);
         setTotalFinal(final);
         setDesconto(descont);
         setTotalServico(servico);
+        
+        if (final == 0) {
+            setIsContaSolicitada(false);
+        };
+
     }, [cartItems]);
-    
+
 
     const fetchItems = useCallback(async () => {
         try {
@@ -125,12 +130,12 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             if (!numero) {
                 setVenda([]);
                 setCartItems([]);
+                setIsContaSolicitada(false);
                 return;
             };
 
             const vendaData = await getSale(parseInt(numero));
             const status = vendaData?.[0].status;
-            console.log(JSON.stringify(vendaData, undefined, 2))
 
             if (status !== "A" && status !== "S") {
                 setVenda([]);
@@ -139,7 +144,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                 await StorageService.removeItem("cartItems");
                 return;
             }
-            
+
             const idVenda = vendaData?.[0]?.id ?? 0;
             const solicitouConta = vendaData?.[0]?.solicitar_conta ?? false;
             const cli = vendaData?.[0]?.cliNome;
@@ -152,14 +157,17 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             setIsContaSolicitada(solicitouConta);
             setVenda(vendaData && vendaData.length > 0 ? vendaData : []);
 
-            const items: CartItem[] = vendaData?.[0]?.itens?.map((item: VendaItem) => ({
-                id: item.id ?? 0,
-                productId: item.codProduto,
-                valorTotal: item.valorTotal,
-                valorLiquido: item.valor - (item.desconto || 0),
-                desconto: item.desconto || 0,
-                vlrOutrasDesp: 0,
-            })) || [];
+            const items: CartItem[] = vendaData?.[0]?.itens
+                ?.filter((item: VendaItem) => item.status !== "C") // Filtra itens que não estão cancelados
+                ?.map((item: VendaItem) => ({
+                    id: item.id ?? 0,
+                    productId: item.codProduto,
+                    valorTotal: item.valorTotal,
+                    valorLiquido: item.valor - (item.desconto || 0),
+                    desconto: item.desconto || 0,
+                    vlrOutrasDesp: 0,
+                })) || [];
+
 
             setCartItems(items);
 
@@ -167,14 +175,14 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             setVenda([]);
             setCartItems([]);
         }
-    },[]);
+    }, []);
 
     const fetchCartItemCount = async () => {
         const itemCount = await getCartItemCount();
         setCartItemCount(itemCount);
     };
 
-     const fetchConfigurations = async () => {
+    const fetchConfigurations = async () => {
         try {
             const urlParams = new URL(window.location.href);
             const pathSegments = urlParams.pathname.split('/');
@@ -231,70 +239,70 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         };
     };
 
-/*     const fetchConfigurations = async () => {
-        try {
-            // Recupera a URL completa do localStorage ou da página atual
-            const currentUrl = await StorageService.getItem("fullUrl") || window.location.href;
-            
-            // Armazena a URL completa no localStorage para persistência
-            await StorageService.setItem("fullUrl", currentUrl);
-    
-            const urlParams = new URL(currentUrl);
-            const pathSegments = urlParams.pathname.split('/');
-            const encryptedMesa = pathSegments[pathSegments.length - 1].replace('m', '');
-    
-            const encryptedIpUrl = urlParams.searchParams.get("ig") || "";
-            const encryptedPorta = urlParams.searchParams.get("u") || "";
-    
-            const mesa = decryptBase64(encryptedMesa, 3) || encryptedMesa;
-            const ipUrl = decryptBase64(encryptedIpUrl, 13) || encryptedIpUrl;
-            const porta = decryptBase64(encryptedPorta, 4) || encryptedPorta;
-    
-            const mesalocal = await StorageService.getItem("numMesa");
-    
-            if (mesa !== mesalocal) {
-                // Remover dados anteriores se a mesa for diferente
-                await StorageService.removeItem("numMesa");
-                await StorageService.removeItem("ipUrl");
-                await StorageService.removeItem("porta");
-                await StorageService.removeItem("token");
-                await StorageService.removeItem("idEmpresa");
-                await StorageService.removeItem("idVendedor");
-                await StorageService.removeItem("vendaId");
-            }
-    
-            await StorageService.setItem("numMesa", mesa);
-            await StorageService.setItem("ipUrl", ipUrl);
-            await StorageService.setItem("porta", porta);
-    
-            const apiBaseUrl = `${ipUrl}:${porta}`;
-            const empresas = await getEmpresaPublica(apiBaseUrl);
-    
-            if (empresas.length > 0) {
-                const empresa = empresas[0];
-    
-                await StorageService.setItem("idEmpresa", empresa.EmpID.toString());
-                await StorageService.setItem("idVendedor", empresa.UserPadrao);
-                setAtendente(parseInt(empresa.UserPadrao));
-                setEmpId(empresa.EmpID.toString());
-                setNumMesa(parseInt(mesa));
-    
-                try {
-                    const response = await axios.get(`http://${apiBaseUrl}/v2/auth`);
-                    await StorageService.setItem("token", response.data.token);
-                } catch (error) {
-                    console.error("Erro ao autenticar", error);
+    /*     const fetchConfigurations = async () => {
+            try {
+                // Recupera a URL completa do localStorage ou da página atual
+                const currentUrl = await StorageService.getItem("fullUrl") || window.location.href;
+                
+                // Armazena a URL completa no localStorage para persistência
+                await StorageService.setItem("fullUrl", currentUrl);
+        
+                const urlParams = new URL(currentUrl);
+                const pathSegments = urlParams.pathname.split('/');
+                const encryptedMesa = pathSegments[pathSegments.length - 1].replace('m', '');
+        
+                const encryptedIpUrl = urlParams.searchParams.get("ig") || "";
+                const encryptedPorta = urlParams.searchParams.get("u") || "";
+        
+                const mesa = decryptBase64(encryptedMesa, 3) || encryptedMesa;
+                const ipUrl = decryptBase64(encryptedIpUrl, 13) || encryptedIpUrl;
+                const porta = decryptBase64(encryptedPorta, 4) || encryptedPorta;
+        
+                const mesalocal = await StorageService.getItem("numMesa");
+        
+                if (mesa !== mesalocal) {
+                    // Remover dados anteriores se a mesa for diferente
+                    await StorageService.removeItem("numMesa");
+                    await StorageService.removeItem("ipUrl");
+                    await StorageService.removeItem("porta");
+                    await StorageService.removeItem("token");
+                    await StorageService.removeItem("idEmpresa");
+                    await StorageService.removeItem("idVendedor");
+                    await StorageService.removeItem("vendaId");
                 }
-            } else {
-                console.error("Nenhuma empresa encontrada.");
+        
+                await StorageService.setItem("numMesa", mesa);
+                await StorageService.setItem("ipUrl", ipUrl);
+                await StorageService.setItem("porta", porta);
+        
+                const apiBaseUrl = `${ipUrl}:${porta}`;
+                const empresas = await getEmpresaPublica(apiBaseUrl);
+        
+                if (empresas.length > 0) {
+                    const empresa = empresas[0];
+        
+                    await StorageService.setItem("idEmpresa", empresa.EmpID.toString());
+                    await StorageService.setItem("idVendedor", empresa.UserPadrao);
+                    setAtendente(parseInt(empresa.UserPadrao));
+                    setEmpId(empresa.EmpID.toString());
+                    setNumMesa(parseInt(mesa));
+        
+                    try {
+                        const response = await axios.get(`http://${apiBaseUrl}/v2/auth`);
+                        await StorageService.setItem("token", response.data.token);
+                    } catch (error) {
+                        console.error("Erro ao autenticar", error);
+                    }
+                } else {
+                    console.error("Nenhuma empresa encontrada.");
+                }
+                
+                setIsConfigurationsLoaded(true);
+            } catch (error) {
+                console.error("Erro ao buscar configurações da empresa:", error);
             }
-            
-            setIsConfigurationsLoaded(true);
-        } catch (error) {
-            console.error("Erro ao buscar configurações da empresa:", error);
-        }
-    }; */
-    
+        }; */
+
 
     return (
         <CartContext.Provider

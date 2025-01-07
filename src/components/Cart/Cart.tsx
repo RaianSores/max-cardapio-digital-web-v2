@@ -160,7 +160,7 @@ const Cart: React.FC = () => {
          const itensSales: VendaItem[] = cartItems.map((product: CartItem) => {
             // Apenas calcular o desconto se existir um valor de promoção válido
             
-            const precoBruto = product.price * product.quantity;
+            const precoBruto = (product.price * product.quantity) + product.discount;
             const precoLiquido =  (product.price * product.quantity) - product.discount;
 
             const desconto = (((precoBruto - precoLiquido) / precoBruto) * 100) / 100
@@ -172,11 +172,11 @@ const Cart: React.FC = () => {
                 qtde: product.quantity,
                 valor: product.price,
                 descricaoProd: product.description,
-                valorTotal: precoLiquido - desconto,
+                valorTotal: precoBruto,
                 status: "A",
                 data: new Date().toISOString(),
                 un: "UN",
-                desconto: desconto / 100, // O desconto calculado ou 0
+                desconto: desconto,
                 vlrOutrasDesp: 0,
                 operador: idVendedor !== null ? parseInt(idVendedor) : 1,
             };
