@@ -108,10 +108,7 @@ const ProductSection: React.FC<ProductProps> = ({
                             : priceFinal;
 
                         const priceDiscoun = priceFinal - priceDiscount  
-
-                        //const desconto = (price )
-                        
-                         
+                             
                         addToCart({
                             id: proID,
                             quantity,

@@ -25,6 +25,7 @@ const Home: React.FC = () => {
     if (nomeCliente) {
       setIsModalOpen(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nomeCliente]);
 
   const handleGrupoSelect = (groupId: number) => {

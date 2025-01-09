@@ -140,30 +140,15 @@ const Cart: React.FC = () => {
         const cart = jsonCartItems ? JSON.parse(jsonCartItems) : { itens: [] };
         const vlrTotalLiqProd = cart.itens?.reduce((total: number, item: CartItem) => total + item.price * item.quantity, 0) || 0;
         const idVendedor = await StorageService.getItem("idVendedor"); 
-        
-/*         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
-            vendaId: 0,
-            codProduto: product.id,
-            cfop: 5102,
-            qtde: product.quantity,
-            valor: product.price,
-            descricaoProd: product.description,
-            valorTotal: product.price * product.quantity,
-            status: "A",
-            data: new Date().toISOString(),
-            un: "UN",
-            desconto: product.discount, //((precoBruto - precoLiquido) / precoBruto) * 100
-            vlrOutrasDesp: 0,
-            operador: idVendedor !== null ? parseInt(idVendedor) : 1, 
-        })); */
 
          const itensSales: VendaItem[] = cartItems.map((product: CartItem) => {
             // Apenas calcular o desconto se existir um valor de promoção válido
-            
-            const precoBruto = (product.price * product.quantity) + product.discount;
-            const precoLiquido =  (product.price * product.quantity) - product.discount;
+            const precoBruto = product.price + product.discount;
+            const precoLiquido = product.price;
 
-            const desconto = (((precoBruto - precoLiquido) / precoBruto) * 100) / 100
+            const taxa = ((precoBruto - precoLiquido) / precoBruto) * 100;
+
+            const desconto = taxa / 100
 
             return {
                 vendaId: 0,
@@ -181,23 +166,6 @@ const Cart: React.FC = () => {
                 operador: idVendedor !== null ? parseInt(idVendedor) : 1,
             };
         }); 
-        
-
-/*         const itensSales: VendaItem[] = cartItems.map((product: CartItem) => ({
-            vendaId: 0,
-            codProduto: product.id,
-            cfop: 5102,
-            qtde: product.quantity,
-            valor: product.price,
-            descricaoProd: product.description,
-            valorTotal: product.price * product.quantity,
-            status: "A",
-            data: new Date().toISOString(),
-            un: "UN",
-            desconto: product.discount, //((precoBruto - precoLiquido) / precoBruto) * 100
-            vlrOutrasDesp: 0,
-            operador: idVendedor !== null ? parseInt(idVendedor) : 1, 
-        })); */
 
         const orderJson: Venda = {
             numMesa: numMesa,
