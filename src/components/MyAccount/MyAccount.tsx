@@ -42,7 +42,6 @@ const MyAccount: React.FC = () => {
         totalServico,
         totalFinal,
         isContaSolicitada,
-        setIsContaSolicitada,
         fetchItems,
         calcularTotais
     } = useContext(CartContext);

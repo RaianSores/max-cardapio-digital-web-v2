@@ -18,6 +18,7 @@ interface CartItem {
     valorLiquido: number;
     desconto: number;
     vlrOutrasDesp: number;
+    qtd: number;
 };
 
 type ProductCardProps = {
@@ -101,13 +102,17 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         let servico = 0;
 
         cartItems.forEach((item) => {
-            const itemValorTotal = item.valorTotal || 0;
-            const itemDesconto = item.desconto || 0;
+            const itemValorTotal = item.valorTotal * item.qtd || 0;
             const itemVlrOutrasDesp = item.vlrOutrasDesp || 0;
 
-            pedido += itemValorTotal + itemDesconto;
-            final += itemValorTotal;
-            descont += itemDesconto;
+            const itemfinal = (item.valorTotal * item.qtd) 
+                                    - ((item.valorTotal * item.qtd) * (item.desconto || 0)) 
+                                    + (((item.valorTotal * item.qtd) - ((item.valorTotal * item.qtd) * (item.desconto || 0)))
+                                    * (item.vlrOutrasDesp || 0));
+
+            pedido += itemValorTotal;
+            final += itemfinal;
+            descont += itemValorTotal - itemfinal;
             servico += itemVlrOutrasDesp;
         });
 
@@ -115,12 +120,12 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
         setTotalFinal(final);
         setDesconto(descont);
         setTotalServico(servico);
-        
+
         if (final == 0) {
             setIsContaSolicitada(false);
         };
 
-    }, [cartItems]);
+    }, [cartItems, vendaId]);
 
 
     const fetchItems = useCallback(async () => {
@@ -166,6 +171,7 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
                     valorLiquido: item.valor - (item.desconto || 0),
                     desconto: item.desconto || 0,
                     vlrOutrasDesp: 0,
+                    qtd: item.qtde,
                 })) || [];
 
 
@@ -238,71 +244,6 @@ export const CartProvider = ({ children }: ICartProviderProps) => {
             console.error("Erro ao buscar configurações da empresa:", error);
         };
     };
-
-    /*     const fetchConfigurations = async () => {
-            try {
-                // Recupera a URL completa do localStorage ou da página atual
-                const currentUrl = await StorageService.getItem("fullUrl") || window.location.href;
-                
-                // Armazena a URL completa no localStorage para persistência
-                await StorageService.setItem("fullUrl", currentUrl);
-        
-                const urlParams = new URL(currentUrl);
-                const pathSegments = urlParams.pathname.split('/');
-                const encryptedMesa = pathSegments[pathSegments.length - 1].replace('m', '');
-        
-                const encryptedIpUrl = urlParams.searchParams.get("ig") || "";
-                const encryptedPorta = urlParams.searchParams.get("u") || "";
-        
-                const mesa = decryptBase64(encryptedMesa, 3) || encryptedMesa;
-                const ipUrl = decryptBase64(encryptedIpUrl, 13) || encryptedIpUrl;
-                const porta = decryptBase64(encryptedPorta, 4) || encryptedPorta;
-        
-                const mesalocal = await StorageService.getItem("numMesa");
-        
-                if (mesa !== mesalocal) {
-                    // Remover dados anteriores se a mesa for diferente
-                    await StorageService.removeItem("numMesa");
-                    await StorageService.removeItem("ipUrl");
-                    await StorageService.removeItem("porta");
-                    await StorageService.removeItem("token");
-                    await StorageService.removeItem("idEmpresa");
-                    await StorageService.removeItem("idVendedor");
-                    await StorageService.removeItem("vendaId");
-                }
-        
-                await StorageService.setItem("numMesa", mesa);
-                await StorageService.setItem("ipUrl", ipUrl);
-                await StorageService.setItem("porta", porta);
-        
-                const apiBaseUrl = `${ipUrl}:${porta}`;
-                const empresas = await getEmpresaPublica(apiBaseUrl);
-        
-                if (empresas.length > 0) {
-                    const empresa = empresas[0];
-        
-                    await StorageService.setItem("idEmpresa", empresa.EmpID.toString());
-                    await StorageService.setItem("idVendedor", empresa.UserPadrao);
-                    setAtendente(parseInt(empresa.UserPadrao));
-                    setEmpId(empresa.EmpID.toString());
-                    setNumMesa(parseInt(mesa));
-        
-                    try {
-                        const response = await axios.get(`http://${apiBaseUrl}/v2/auth`);
-                        await StorageService.setItem("token", response.data.token);
-                    } catch (error) {
-                        console.error("Erro ao autenticar", error);
-                    }
-                } else {
-                    console.error("Nenhuma empresa encontrada.");
-                }
-                
-                setIsConfigurationsLoaded(true);
-            } catch (error) {
-                console.error("Erro ao buscar configurações da empresa:", error);
-            }
-        }; */
-
 
     return (
         <CartContext.Provider

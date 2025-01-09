@@ -15,7 +15,6 @@
     "@types/crypto-js": "^4.2.2",
     "@types/react-lottie": "^1.2.10",
     "axios": "^1.7.7",
-    "babel-plugin-styled-components": "^2.1.4",
     "crypto-js": "^4.2.0",
     "lottie-react": "^2.4.0",
     "max-cardapio-digital-web-v2": "file:",
